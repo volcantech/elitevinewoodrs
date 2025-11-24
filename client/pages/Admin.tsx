@@ -55,6 +55,7 @@ export default function Admin() {
       const { token } = await response.json();
       setToken(token);
       setIsAuthenticated(true);
+      sessionStorage.setItem("adminToken", token);
       toast.success("Authentification réussie");
       fetchCategories(token);
       fetchVehicles(token);
@@ -67,8 +68,19 @@ export default function Admin() {
   const handleLogout = () => {
     setToken("");
     setIsAuthenticated(false);
+    sessionStorage.removeItem("adminToken");
     navigate("/");
   };
+
+  useEffect(() => {
+    const savedToken = sessionStorage.getItem("adminToken");
+    if (savedToken) {
+      setToken(savedToken);
+      setIsAuthenticated(true);
+      fetchCategories(savedToken);
+      fetchVehicles(savedToken);
+    }
+  }, []);
 
   const fetchCategories = async (authToken: string) => {
     try {
