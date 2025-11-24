@@ -13,7 +13,15 @@ const VEHICLES_PER_PAGE = 9;
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
 
 export default function Catalog() {
-  const { data: vehicles = [], isLoading } = useVehiclesCache();
+  const { data: vehicles = [], isLoading, isFetching } = useVehiclesCache();
+  
+  // Log cache status
+  useEffect(() => {
+    if (!isFetching && vehicles.length > 0) {
+      console.log("✨ [Catalog] Using cached data - " + vehicles.length + " vehicles from cache");
+    }
+  }, [vehicles.length, isFetching]);
+  
   const [selectedCategory, setSelectedCategory] =
     useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -132,12 +140,8 @@ export default function Catalog() {
       {/* Main Content */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black via-gray-950 to-black">
         <div className="max-w-7xl mx-auto">
-          {isLoading ? (
-            <LoadingCar />
-          ) : (
-            <>
-              {/* Search Bar */}
-              <div className="mb-8 sticky top-16 z-40 bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-md py-4 px-4 rounded-xl border border-amber-500/20 shadow-lg shadow-amber-500/10">
+          {/* Search Bar */}
+          <div className="mb-8 sticky top-16 z-40 bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-md py-4 px-4 rounded-xl border border-amber-500/20 shadow-lg shadow-amber-500/10">
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-400" />
                   <input
@@ -148,10 +152,10 @@ export default function Catalog() {
                     className="w-full bg-gray-800/50 border border-gray-700 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 transition-all"
                   />
                 </div>
-              </div>
+          </div>
 
-              {/* Filters Section */}
-              <div className="mb-8 space-y-4">
+          {/* Filters Section */}
+          <div className="mb-8 space-y-4">
                 {/* Category, Sort and Particularity in same row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Category Filter */}
@@ -434,11 +438,11 @@ export default function Catalog() {
                       <span>8</span>
                     </div>
                   </div>
-                </div>
               </div>
+            </div>
 
-              {/* Results Info */}
-              <div className="mb-8 flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl p-4">
+          {/* Results Info */}
+          <div className="mb-8 flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl p-4">
                 <div className="text-gray-300 font-medium flex items-center gap-2">
                   <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
                   <span>
@@ -455,50 +459,50 @@ export default function Catalog() {
                     <X className="w-4 h-4" />
                     Réinitialiser tous les filtres
                   </button>
-                )}
+              )}
+          </div>
+
+          {/* Vehicles Grid */}
+          {isLoading ? (
+            <LoadingCar />
+          ) : filteredVehicles.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {visibleVehicles.map((vehicle) => (
+                  <VehicleCard key={vehicle.id} vehicle={vehicle} />
+                ))}
               </div>
 
-              {/* Vehicles Grid */}
-              {filteredVehicles.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {visibleVehicles.map((vehicle) => (
-                      <VehicleCard key={vehicle.id} vehicle={vehicle} />
-                    ))}
-                  </div>
-
-                  {hasMoreVehicles && (
-                    <div className="flex justify-center mt-12">
-                      <button
-                        onClick={handleLoadMore}
-                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg shadow-amber-500/50 hover:shadow-xl hover:shadow-amber-500/70"
-                      >
-                        Afficher plus de véhicules ({Math.min(VEHICLES_PER_PAGE, filteredVehicles.length - displayedCount)} de plus)
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-24">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center">
-                    <Search className="w-12 h-12 text-gray-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    Aucun véhicule trouvé
-                  </h3>
-                  <p className="text-gray-400 mb-6 max-w-sm mx-auto">
-                    Essayez de modifier vos critères de recherche
-                  </p>
+              {hasMoreVehicles && (
+                <div className="flex justify-center mt-12">
                   <button
-                    onClick={resetAllFilters}
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold py-2 px-6 rounded-lg transition-all duration-300"
+                    onClick={handleLoadMore}
+                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg shadow-amber-500/50 hover:shadow-xl hover:shadow-amber-500/70"
                   >
-                    <X className="w-4 h-4" />
-                    Réinitialiser les filtres
+                    Afficher plus de véhicules ({Math.min(VEHICLES_PER_PAGE, filteredVehicles.length - displayedCount)} de plus)
                   </button>
                 </div>
               )}
             </>
+          ) : (
+            <div className="text-center py-24">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center">
+                <Search className="w-12 h-12 text-gray-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                Aucun véhicule trouvé
+              </h3>
+              <p className="text-gray-400 mb-6 max-w-sm mx-auto">
+                Essayez de modifier vos critères de recherche
+              </p>
+              <button
+                onClick={resetAllFilters}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold py-2 px-6 rounded-lg transition-all duration-300"
+              >
+                <X className="w-4 h-4" />
+                Réinitialiser les filtres
+              </button>
+            </div>
           )}
         </div>
       </section>
