@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil, Trash2, ArrowUpDown } from "lucide-react";
+import { Pencil, Trash2, ArrowUpDown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { authenticatedFetch } from "@/lib/api";
 import { formatPrice, parsePrice } from "@/lib/priceFormatter";
@@ -102,7 +102,11 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
 
   const handleEdit = (vehicle: Vehicle) => {
     setEditingVehicle(vehicle);
-    setFormData(vehicle);
+    // Convert null particularity to "Aucune" for the form
+    setFormData({
+      ...vehicle,
+      particularity: vehicle.particularity || "Aucune"
+    });
     setIsEditDialogOpen(true);
   };
 
@@ -143,6 +147,7 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
           price: price || 0,
           trunk_weight: trunkWeight || 100,
           seats: seats || 2,
+          particularity: !formData.particularity || formData.particularity === "Aucune" ? null : formData.particularity,
         }),
       });
 
@@ -210,7 +215,16 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
                   <TableCell className="text-amber-100">{vehicle.category}</TableCell>
                   <TableCell className="text-white">{vehicle.trunk_weight} kg</TableCell>
                   <TableCell className="text-white">{vehicle.seats}</TableCell>
-                  <TableCell className="text-amber-100">{vehicle.particularity === "Aucune" || !vehicle.particularity ? "-" : vehicle.particularity}</TableCell>
+                  <TableCell className="text-amber-100">
+                    {vehicle.particularity && vehicle.particularity !== "Aucune" ? (
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>{vehicle.particularity}</span>
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
                   <TableCell className="text-right py-3 px-6">
                     <div className="flex gap-2 justify-end">
                       <Button
@@ -327,8 +341,8 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
             <div className="grid gap-3">
               <Label className="text-amber-300 font-semibold">Particularité</Label>
               <Select
-                value={formData.particularity === "Aucune" || !formData.particularity ? "" : formData.particularity}
-                onValueChange={(value) => handleInputChange("particularity", value === "" ? "Aucune" : value)}
+                value={formData.particularity || "Aucune"}
+                onValueChange={(value) => handleInputChange("particularity", value)}
               >
                 <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20">
                   <SelectValue />
