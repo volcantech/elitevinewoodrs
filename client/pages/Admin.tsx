@@ -16,6 +16,7 @@ import { AdminHeader } from "@/components/AdminHeader";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { authenticatedFetch } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 interface Vehicle {
   id: number;
@@ -81,6 +82,33 @@ export default function Admin() {
       fetchVehicles(savedToken);
     }
   }, []);
+
+  const fetchCategoriesWithCache = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await fetch("/api/vehicles/categories");
+      if (!response.ok) throw new Error("Failed to fetch categories");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    enabled: false,
+  });
+
+  const fetchVehiclesWithCache = useQuery({
+    queryKey: ["adminVehicles", searchQuery, selectedCategory],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("search", searchQuery);
+      if (selectedCategory !== "all") params.append("category", selectedCategory);
+      const response = await fetch(`/api/vehicles?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch vehicles");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    enabled: false,
+  });
 
   const fetchCategories = async (authToken: string) => {
     try {
