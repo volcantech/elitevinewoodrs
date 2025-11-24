@@ -22,6 +22,13 @@ import { toast } from "sonner";
 import { authenticatedFetch } from "@/lib/api";
 import { formatPrice, parsePrice } from "@/lib/priceFormatter";
 
+const formatPriceDisplay = (price: string | number): string => {
+  if (typeof price === "string" && !price) return "";
+  const numPrice = typeof price === "string" ? parseInt(price.replace(/\./g, ""), 10) : price;
+  if (isNaN(numPrice)) return "";
+  return formatPrice(numPrice).replace("$", "").trim();
+};
+
 interface AddVehicleDialogProps {
   categories: string[];
   token: string;
@@ -152,8 +159,11 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
                 id="price"
                 type="text"
                 placeholder="Ex: 1200000"
-                value={formData.price}
-                onChange={(e) => handleInputChange("price", e.target.value)}
+                value={formatPriceDisplay(formData.price)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\./g, "");
+                  handleInputChange("price", value);
+                }}
                 className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20"
               />
             </div>
