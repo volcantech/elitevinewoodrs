@@ -2,20 +2,9 @@ import { useState, useMemo, useEffect } from "react";
 import { Search, ChevronDown, Package, DollarSign, X, Users, ArrowUpDown, Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import VehicleCard from "@/components/VehicleCard";
-import { CATEGORIES } from "@/data/vehicles";
+import { CATEGORIES, Vehicle, VehicleCategory } from "@/data/vehicles";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/priceFormatter";
-
-interface Vehicle {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  trunkWeight: number;
-  image: string;
-  seats: number;
-  particularity: string | null;
-}
 
 const VEHICLES_PER_PAGE = 9;
 
@@ -46,9 +35,9 @@ export default function Catalog() {
         
         // Transform API data to component format
         const transformedVehicles: Vehicle[] = data.map((v: any) => ({
-          id: v.id.toString(),
+          id: v.id,
           name: v.name,
-          category: v.category,
+          category: v.category as VehicleCategory,
           price: v.price,
           trunkWeight: v.trunk_weight,
           image: v.image_url,
@@ -109,11 +98,11 @@ export default function Catalog() {
 
   const hasMoreVehicles = displayedCount < filteredVehicles.length;
 
-  // Get unique particularities
+  // Get unique particularities (excluding null and "Aucune")
   const availableParticularities = useMemo(() => {
     const particularities = vehicles
       .map(v => v.particularity)
-      .filter((p): p is string => p !== null);
+      .filter((p): p is string => p !== null && p !== "Aucune");
     return Array.from(new Set(particularities)).sort();
   }, [vehicles]);
 
