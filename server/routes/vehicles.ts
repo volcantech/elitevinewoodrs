@@ -5,7 +5,9 @@ const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
 export async function getAllVehicles(req: Request, res: Response) {
   try {
-    const { search, category } = req.query;
+    const { search, category, limit = '20', offset = '0' } = req.query;
+    const limitNum = Math.min(parseInt(limit as string) || 20, 100);
+    const offsetNum = Math.max(parseInt(offset as string) || 0, 0);
 
     let query = `SELECT * FROM vehicles`;
     const conditions: string[] = [];
@@ -30,11 +32,30 @@ export async function getAllVehicles(req: Request, res: Response) {
 
     query += ` ORDER BY category, name`;
 
-    const vehicles = params.length > 0 
-      ? await sql(query, params)
-      : await sql(query);
+    // Get total count for pagination
+    let countQuery = `SELECT COUNT(*) as total FROM vehicles`;
+    if (conditions.length > 0) {
+      countQuery += ` WHERE ${conditions.join(' AND ')}`;
+    }
 
-    res.json(vehicles);
+    const countResult = params.length > 0
+      ? await sql(countQuery, params)
+      : await sql(countQuery);
+    const total = countResult[0]?.total || 0;
+
+    // Apply pagination
+    query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    params.push(limitNum, offsetNum);
+
+    const vehicles = await sql(query, params);
+
+    res.json({
+      vehicles,
+      total,
+      limit: limitNum,
+      offset: offsetNum,
+      hasMore: offsetNum + limitNum < total
+    });
   } catch (error) {
     console.error("Error fetching vehicles:", error);
     res.status(500).json({ error: "Failed to fetch vehicles" });
