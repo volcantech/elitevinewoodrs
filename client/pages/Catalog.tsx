@@ -2,20 +2,9 @@ import { useState, useMemo, useEffect } from "react";
 import { Search, ChevronDown, Package, DollarSign, X, Users, ArrowUpDown, Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import VehicleCard from "@/components/VehicleCard";
-import { CATEGORIES } from "@/data/vehicles";
+import { CATEGORIES, type Vehicle } from "@/data/vehicles";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/priceFormatter";
-
-interface Vehicle {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  trunkWeight: number;
-  image: string;
-  seats: number;
-  particularity: string | null;
-}
 
 const VEHICLES_PER_PAGE = 9;
 
@@ -35,20 +24,27 @@ export default function Catalog() {
   const [displayedCount, setDisplayedCount] = useState(VEHICLES_PER_PAGE);
   const [sortBy, setSortBy] = useState<SortOption>("alphabetical");
 
-  // Fetch vehicles from API on mount
+  // Fetch vehicles from API on mount and on filter changes
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/vehicles");
+        const params = new URLSearchParams();
+        params.set('limit', '20');
+        params.set('offset', '0');
+        
+        if (searchQuery) params.set('search', searchQuery);
+        if (selectedCategory) params.set('category', selectedCategory);
+        
+        const response = await fetch(`/api/vehicles?${params}`);
         if (!response.ok) throw new Error("Failed to fetch vehicles");
         const data = await response.json();
         
         // Transform API data to component format
-        const transformedVehicles: Vehicle[] = data.map((v: any) => ({
+        const transformedVehicles: Vehicle[] = data.vehicles.map((v: any): Vehicle => ({
           id: v.id.toString(),
           name: v.name,
-          category: v.category,
+          category: v.category as Vehicle['category'],
           price: v.price,
           trunkWeight: v.trunk_weight,
           image: v.image_url,
@@ -57,6 +53,7 @@ export default function Catalog() {
         }));
         
         setVehicles(transformedVehicles);
+        setDisplayedCount(20);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
         setVehicles([]);
@@ -66,7 +63,7 @@ export default function Catalog() {
     };
 
     fetchVehicles();
-  }, []);
+  }, [searchQuery, selectedCategory]);
 
   const filteredVehicles = useMemo(() => {
     let filtered = vehicles.filter((vehicle) => {
