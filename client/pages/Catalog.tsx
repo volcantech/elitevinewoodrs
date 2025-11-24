@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, ChevronDown, Package, DollarSign, X, Users, ArrowUpDown, Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import VehicleCard from "@/components/VehicleCard";
@@ -222,7 +222,7 @@ export default function Catalog() {
                       className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer hover:bg-gray-700"
                     >
                       <option value="">Toutes les particularités</option>
-                      {availableParticularities.map((particularity) => {
+                      {availableParticularities.map((particularity: string) => {
                         const count = vehicles.filter(
                           (v) => v.particularity === particularity,
                         ).length;
