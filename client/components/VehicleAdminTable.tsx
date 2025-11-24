@@ -29,6 +29,13 @@ import { toast } from "sonner";
 import { authenticatedFetch } from "@/lib/api";
 import { formatPrice, parsePrice } from "@/lib/priceFormatter";
 
+const formatPriceDisplay = (price: string | number): string => {
+  if (typeof price === "string" && !price) return "";
+  const numPrice = typeof price === "string" ? parseInt(price.replace(/\./g, ""), 10) : price;
+  if (isNaN(numPrice)) return "";
+  return formatPrice(numPrice).replace("$", "").trim();
+};
+
 interface Vehicle {
   id: number;
   name: string;
@@ -139,15 +146,20 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
       const price = typeof formData.price === "string" ? parsePrice(formData.price) : formData.price;
       const trunkWeight = typeof formData.trunk_weight === "string" ? parseInt(formData.trunk_weight, 10) : formData.trunk_weight;
       const seats = typeof formData.seats === "string" ? parseInt(formData.seats, 10) : formData.seats;
+      
+      // Convert "Aucune" to null for particularity
+      const particularity = formData.particularity === "Aucune" || !formData.particularity ? null : formData.particularity;
 
       const response = await authenticatedFetch(`/api/vehicles/${editingVehicle.id}`, token, {
         method: "PUT",
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          category: formData.category,
           price: price || 0,
           trunk_weight: trunkWeight || 100,
+          image_url: formData.image_url,
           seats: seats || 2,
-          particularity: !formData.particularity || formData.particularity === "Aucune" ? null : formData.particularity,
+          particularity: particularity,
         }),
       });
 
@@ -291,8 +303,11 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
                 <Label className="text-amber-300 font-semibold">Prix ($)</Label>
                 <Input
                   type="text"
-                  value={formData.price || ""}
-                  onChange={(e) => handleInputChange("price", e.target.value)}
+                  value={formatPriceDisplay(formData.price)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\./g, "");
+                    handleInputChange("price", value);
+                  }}
                   placeholder="Ex: 1200000"
                   className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20"
                 />
