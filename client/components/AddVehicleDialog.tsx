@@ -103,22 +103,16 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
           Ajouter un véhicule
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-amber-600/30 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-amber-600/30 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
             Ajouter un nouveau véhicule
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-6 py-4">
-          {imagePreview && (
-            <div className="relative w-full h-48 rounded-lg overflow-hidden border border-amber-600/30 bg-slate-800">
-              <img src={imagePreview} alt="Aperçu" className="w-full h-full object-cover" />
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-amber-300">
+        <div className="grid gap-5 py-6">
+          <div className="grid gap-3">
+            <Label htmlFor="name" className="text-amber-300 font-semibold">
               Nom du véhicule *
             </Label>
             <Input
@@ -127,16 +121,16 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
               placeholder="Ex: Ferrari F8 Tributo"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-amber-200/30"
+              className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-slate-400 focus:border-amber-500 focus:ring-amber-500/20"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="category" className="text-amber-300">
+          <div className="grid gap-3">
+            <Label htmlFor="category" className="text-amber-300 font-semibold">
               Catégorie *
             </Label>
             <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-              <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white">
+              <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20">
                 <SelectValue placeholder="Sélectionnez une catégorie" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-amber-600/30">
@@ -149,51 +143,50 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="price" className="text-amber-300">
-              Prix *
-            </Label>
-            <Input
-              id="price"
-              type="text"
-              placeholder="Ex: 1200000"
-              value={formData.price}
-              onChange={(e) => handleInputChange("price", e.target.value)}
-              className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-amber-200/30"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="trunk_weight" className="text-amber-300">
-                Coffre
+          <div className="grid grid-cols-3 gap-4">
+            <div className="grid gap-3">
+              <Label htmlFor="price" className="text-amber-300 font-semibold">
+                Prix ($) *
+              </Label>
+              <Input
+                id="price"
+                type="text"
+                placeholder="Ex: 1200000"
+                value={formData.price}
+                onChange={(e) => handleInputChange("price", e.target.value)}
+                className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20"
+              />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="trunk_weight" className="text-amber-300 font-semibold">
+                Coffre (kg)
               </Label>
               <Input
                 id="trunk_weight"
                 type="text"
-                placeholder="100"
+                placeholder="Ex: 100"
                 value={formData.trunk_weight}
                 onChange={(e) => handleInputChange("trunk_weight", e.target.value)}
-                className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-amber-200/30"
+                className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="seats" className="text-amber-300">
+            <div className="grid gap-3">
+              <Label htmlFor="seats" className="text-amber-300 font-semibold">
                 Places
               </Label>
               <Input
                 id="seats"
                 type="text"
-                placeholder="2"
+                placeholder="Ex: 2"
                 value={formData.seats}
                 onChange={(e) => handleInputChange("seats", e.target.value)}
-                className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-amber-200/30"
+                className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="image_url" className="text-amber-300">
+          <div className="grid gap-3">
+            <Label htmlFor="image_url" className="text-amber-300 font-semibold">
               URL de l'image *
             </Label>
             <Input
@@ -202,16 +195,28 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
               placeholder="https://example.com/image.jpg"
               value={formData.image_url}
               onChange={(e) => handleInputChange("image_url", e.target.value)}
-              className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-amber-200/30"
+              className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-slate-400 focus:border-amber-500 focus:ring-amber-500/20"
             />
+            {imagePreview && (
+              <div className="rounded-lg border border-amber-600/30 overflow-hidden bg-slate-950">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-40 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                  }}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="particularity" className="text-amber-300">
+          <div className="grid gap-3">
+            <Label htmlFor="particularity" className="text-amber-300 font-semibold">
               Particularité
             </Label>
             <Select value={formData.particularity} onValueChange={(value) => handleInputChange("particularity", value)}>
-              <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white">
+              <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20">
                 <SelectValue placeholder="Aucune" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-amber-600/30">
@@ -225,8 +230,12 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
           </div>
         </div>
 
-        <DialogFooter>
-          <Button onClick={() => setIsOpen(false)} variant="outline" className="border-amber-600/30 hover:bg-slate-800">
+        <DialogFooter className="gap-3">
+          <Button 
+            onClick={() => setIsOpen(false)} 
+            variant="outline" 
+            className="border-amber-600/30 hover:bg-slate-800 text-amber-300"
+          >
             Annuler
           </Button>
           <Button
