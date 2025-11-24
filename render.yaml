@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: elite-vinewood-auto
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/server/node-build.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NETLIFY_DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
