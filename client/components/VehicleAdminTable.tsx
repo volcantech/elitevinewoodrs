@@ -229,9 +229,10 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
                   <TableCell className="text-white">{vehicle.seats}</TableCell>
                   <TableCell className="text-amber-100">
                     {vehicle.particularity && vehicle.particularity !== "Aucune" ? (
-
-                  <div class="rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles w-3 h-3" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path><path d="M20 2v4"></path><path d="M22 4h-4"></path><circle cx="4" cy="20" r="2"></circle></svg>{vehicle.particularity}</div>
-
+                  <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                      {vehicle.particularity}
+                  </Badge>
                     ) : (
                       "-"
                     )}
