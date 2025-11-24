@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -229,10 +230,10 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh }: Ve
                   <TableCell className="text-white">{vehicle.seats}</TableCell>
                   <TableCell className="text-amber-100">
                     {vehicle.particularity && vehicle.particularity !== "Aucune" ? (
-                  <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                      {vehicle.particularity}
-                  </Badge>
+                      <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 flex items-center gap-1 w-fit">
+                        <Sparkles className="w-3 h-3" />
+                        {vehicle.particularity}
+                      </Badge>
                     ) : (
                       "-"
                     )}
