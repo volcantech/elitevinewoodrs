@@ -18,7 +18,7 @@ export default function Catalog() {
   // Log cache status
   useEffect(() => {
     if (!isFetching && vehicles.length > 0) {
-      console.log("✨ [Catalog] Using cached data - " + vehicles.length + " vehicles from cache");
+      console.log("✨ [Catalogue] Utilisation des véhicules stockés - " + vehicles.length + " véhicules chargés depuis le cache");
     }
   }, [vehicles.length, isFetching]);
   
