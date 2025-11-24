@@ -1,18 +1,19 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Search, ChevronDown, Package, DollarSign, X, Users, ArrowUpDown, Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import VehicleCard from "@/components/VehicleCard";
+import { LoadingCar } from "@/components/LoadingCar";
 import { CATEGORIES, Vehicle, VehicleCategory } from "@/data/vehicles";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/priceFormatter";
+import { useVehiclesCache } from "@/lib/vehicleCache";
 
 const VEHICLES_PER_PAGE = 9;
 
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
 
 export default function Catalog() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: vehicles = [], isLoading } = useVehiclesCache();
   const [selectedCategory, setSelectedCategory] =
     useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,40 +25,9 @@ export default function Catalog() {
   const [displayedCount, setDisplayedCount] = useState(VEHICLES_PER_PAGE);
   const [sortBy, setSortBy] = useState<SortOption>("alphabetical");
 
-  // Fetch vehicles from API on mount
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch("/api/vehicles");
-        if (!response.ok) throw new Error("Failed to fetch vehicles");
-        const data = await response.json();
-        
-        // Transform API data to component format
-        const transformedVehicles: Vehicle[] = data.map((v: any) => ({
-          id: v.id,
-          name: v.name,
-          category: v.category as VehicleCategory,
-          price: v.price,
-          trunkWeight: v.trunk_weight,
-          image: v.image_url,
-          seats: v.seats,
-          particularity: v.particularity,
-        }));
-        
-        setVehicles(transformedVehicles);
-      } catch (error) {
-        console.error("Error fetching vehicles:", error);
-        setVehicles([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVehicles();
-  }, []);
 
   const filteredVehicles = useMemo(() => {
+    if (!vehicles) return [];
     let filtered = vehicles.filter((vehicle) => {
       const matchesCategory =
         !selectedCategory || vehicle.category === selectedCategory;
@@ -163,9 +133,7 @@ export default function Catalog() {
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black via-gray-950 to-black">
         <div className="max-w-7xl mx-auto">
           {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Chargement des véhicules...</p>
-            </div>
+            <LoadingCar />
           ) : (
             <>
               {/* Search Bar */}
@@ -375,12 +343,26 @@ export default function Catalog() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1.5 text-white truncate">
-                        {formatPrice(minBudget)}
-                      </div>
-                      <div className="bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1.5 text-white truncate">
-                        {formatPrice(maxBudget)}
-                      </div>
+                      <input
+                        type="text"
+                        value={formatPrice(minBudget)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\./g, '');
+                          const num = parseInt(value, 10) || 0;
+                          setMinBudget(Math.min(num, maxBudget));
+                        }}
+                        className="bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
+                      />
+                      <input
+                        type="text"
+                        value={formatPrice(maxBudget)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\./g, '');
+                          const num = parseInt(value, 10) || 15000000;
+                          setMaxBudget(Math.max(num, minBudget));
+                        }}
+                        className="bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
+                      />
                     </div>
                   </div>
 
