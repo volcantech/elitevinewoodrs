@@ -2,5 +2,5 @@ services:
   - type: web
     name: elite-vinewood-auto
     runtime: node
-    buildCommand: npm install && npm run build
-    startCommand: node dist/server/node-build.mjs
+    buildCommand: npm run build
+    startCommand: npm start
