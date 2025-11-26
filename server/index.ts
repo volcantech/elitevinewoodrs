@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 import { handleDemo } from "./routes/demo";
 import {
   getAllVehicles,
@@ -150,5 +152,26 @@ export function createServer() {
   app.get("/api/activity-logs", adminAuth, requireLogsPermission, getActivityLogs);
   app.get("/api/activity-logs/paginated", adminAuth, requireLogsPermission, getActivityLogsPaginatedHandler);
 
+  // Serve static files from dist/spa (client build)
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const spaDir = path.join(__dirname, "../dist/spa");
+  
+  app.use(express.static(spaDir));
+  
+  // SPA fallback - serve index.html for all non-API routes
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(spaDir, "index.html"));
+  });
+
   return app;
+}
+
+// Start server when run directly (not imported as a module)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const app = createServer();
+  const port = process.env.PORT || 5000;
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`✅ Server running on http://0.0.0.0:${port}`);
+  });
 }
