@@ -32,6 +32,13 @@ export default defineConfig({
         // External dependencies that should not be bundled
         "express",
         "cors",
+        "helmet",
+        "cookie-parser",
+        "bcryptjs",
+        "jsonwebtoken",
+        "express-rate-limit",
+        "@netlify/neon",
+        "dotenv",
       ],
       output: {
         format: "es",
