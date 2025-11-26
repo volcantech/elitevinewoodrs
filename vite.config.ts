@@ -6,7 +6,7 @@ import path from "path";
 export default defineConfig(({ command }) => {
   const plugins = [react()];
   
-  // Only add express plugin in dev mode
+  // Only add express plugin in dev mode (not during build)
   if (command === 'serve') {
     plugins.push(expressPlugin());
   }
@@ -40,13 +40,21 @@ function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
     apply: "serve",
-    async configureServer(server) {
-      // Lazy load createServer only in dev
-      const { createServer } = await import("./server/index.ts");
-      const app = createServer();
-
-      // Add Express app as middleware to Vite dev server
-      server.middlewares.use(app);
+    configureServer(server) {
+      // Lazy-require the server module only at runtime in dev
+      return () => {
+        server.middlewares.use(async (req, res, next) => {
+          try {
+            // Dynamic import deferred until first request
+            const mod = await import("./server/index.ts");
+            const { createServer } = mod;
+            const app = createServer();
+            app(req, res, next);
+          } catch (err) {
+            next(err);
+          }
+        });
+      };
     },
   };
 }
