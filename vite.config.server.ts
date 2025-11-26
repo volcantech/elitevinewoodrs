@@ -15,7 +15,7 @@ export default defineConfig({
     ssr: true,
     rollupOptions: {
       external: [
-        // Node.js built-ins
+        // Only Node.js built-ins - all npm packages should be bundled for production
         "fs",
         "path",
         "url",
@@ -29,16 +29,6 @@ export default defineConfig({
         "buffer",
         "querystring",
         "child_process",
-        // External dependencies that should not be bundled
-        "express",
-        "cors",
-        "helmet",
-        "cookie-parser",
-        "bcryptjs",
-        "jsonwebtoken",
-        "express-rate-limit",
-        "@netlify/neon",
-        "dotenv",
       ],
       output: {
         format: "es",
