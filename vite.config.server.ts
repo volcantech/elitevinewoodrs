@@ -14,10 +14,7 @@ export default defineConfig({
     target: "node22",
     ssr: true,
     rollupOptions: {
-      external: (id: string) => {
-        // Mark all packages as external - they'll be installed by npm
-        return !id.startsWith('.') && !id.startsWith('/');
-      },
+      external: [],
       output: {
         format: "es",
         entryFileNames: "[name].mjs",
