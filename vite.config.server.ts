@@ -14,22 +14,10 @@ export default defineConfig({
     target: "node22",
     ssr: true,
     rollupOptions: {
-      external: [
-        // Only Node.js built-ins - all npm packages should be bundled for production
-        "fs",
-        "path",
-        "url",
-        "http",
-        "https",
-        "os",
-        "crypto",
-        "stream",
-        "util",
-        "events",
-        "buffer",
-        "querystring",
-        "child_process",
-      ],
+      external: (id: string) => {
+        // Mark all packages as external - they'll be installed by npm
+        return !id.startsWith('.') && !id.startsWith('/');
+      },
       output: {
         format: "es",
         entryFileNames: "[name].mjs",
