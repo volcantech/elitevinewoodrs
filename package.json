@@ -12,8 +12,8 @@
   },
   "scripts": {
     "dev": "vite --config vite.dev.config.ts",
-    "build": "vite build",
-    "start": "tsx server/index.ts",
+    "build": "npm install && vite build",
+    "start": "node --loader tsx server/index.ts",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc"
