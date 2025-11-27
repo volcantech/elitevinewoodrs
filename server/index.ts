@@ -56,6 +56,14 @@ export function createServer() {
     noSniff: true,
   }));
 
+  // Add cache control headers middleware
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api/auth')) {
+      res.set('Cache-Control', 'public, max-age=300');
+    }
+    next();
+  });
+
   // CORS - Allow all origins in development, restrict in production
   app.use(cors({
     origin: true,
