@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -67,6 +67,12 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<Vehicle>>({});
+
+  // Auto-refresh vehicles toutes les 5 secondes
+  useEffect(() => {
+    const interval = setInterval(() => onRefresh(), 5000);
+    return () => clearInterval(interval);
+  }, [onRefresh]);
 
   const handleSort = (field: SortField) => {
     let newOrder: SortOrder = "asc";
@@ -203,7 +209,7 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
                 >
                   <TableCell className="py-3 px-6">
                     <img
-                      src={vehicle.image || vehicle.image_url}
+                      src={vehicle.image_url}
                       alt={vehicle.name}
                       className="w-20 h-12 object-cover rounded-md border border-amber-600/30 hover:border-amber-500/60 transition-all shadow-md"
                     />
