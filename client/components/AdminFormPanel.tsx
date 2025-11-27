@@ -174,9 +174,6 @@ export function AdminFormPanel({ categories, token, onVehicleAdded }: AdminFormP
                 src={formData.image_url}
                 alt="Preview"
                 className="w-full h-32 object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/placeholder.svg";
-                }}
               />
             </div>
           )}
