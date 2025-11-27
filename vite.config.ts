@@ -9,6 +9,15 @@ export default {
   build: {
     outDir: 'dist/spa',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'radix-ui': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-tabs'],
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'query-lib': ['@tanstack/react-query'],
+        }
+      }
+    }
   },
   resolve: {
     alias: {
