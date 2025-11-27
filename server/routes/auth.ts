@@ -28,6 +28,7 @@ export async function login(req: Request, res: Response) {
   }
 
   try {
+    console.time("⏱️ Vérification connexion");
     const result = await sql`
       SELECT id, username, access_key, permissions
       FROM admin_users
@@ -36,11 +37,14 @@ export async function login(req: Request, res: Response) {
     `;
 
     if (!result || result.length === 0) {
+      console.timeEnd("⏱️ Vérification connexion");
       return res.status(403).json({ error: "❌ Pseudonyme ou clé d'accès incorrect" });
     }
 
     const user = result[0];
+    console.log("🔐 Vérification bcrypt en cours...");
     const isValidKey = await bcrypt.compare(accessKey, user.access_key);
+    console.timeEnd("⏱️ Vérification connexion");
     
     if (!isValidKey) {
       return res.status(403).json({ error: "❌ Pseudonyme ou clé d'accès incorrect" });
