@@ -60,14 +60,14 @@ export async function login(req: Request, res: Response) {
         authenticated: true,
       } as JWTPayload,
       JWT_SECRET,
-      { expiresIn: "24h" }
+      { expiresIn: "2h" }
     );
 
     res.cookie('adminToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 2 * 60 * 60 * 1000,
       path: '/',
     });
 
