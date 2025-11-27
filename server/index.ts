@@ -45,11 +45,11 @@ export function createServer() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"], // Removed 'unsafe-inline' - prevents XSS
-        styleSrc: ["'self'", "https://fonts.googleapis.com"], // Removed 'unsafe-inline'
+        scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline for Vite HMR in dev
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline for Vite HMR
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", "ws://localhost:*", "http://localhost:*"], // Allow Vite HMR websocket
         frameSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
