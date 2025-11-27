@@ -24,14 +24,14 @@ export function AnnouncementProvider({ children }: { children: React.ReactNode }
         setAnnouncement(data);
       }
     } catch (error) {
-      console.error("❌ Erreur lors du chargement de l'annonce :", error);
+      // Silently fail for announcements
     }
   };
 
   useEffect(() => {
     refreshAnnouncement();
-    // Rafraîchir l'annonce toutes les 30 secondes
-    const interval = setInterval(refreshAnnouncement, 30000);
+    // Rafraîchir l'annonce toutes les 60 secondes (optimisé)
+    const interval = setInterval(refreshAnnouncement, 60000);
     return () => clearInterval(interval);
   }, []);
 
