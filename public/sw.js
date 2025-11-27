@@ -1,61 +1,26 @@
-const CACHE_NAME = 'elite-vinewood-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache).catch(() => {
-        // Silently fail if offline
-      });
-    })
-  );
+// Service Worker - Ultra-safe network-first strategy
+self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
 });
 
-self.addEventListener('fetch', event => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Don't cache API requests - always fetch fresh
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(request));
+// Network-first: Just pass through to network, no caching
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') {
     return;
   }
 
-  // Cache-first for assets
-  if (request.method === 'GET' && (url.pathname.includes('/assets/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css'))) {
-    event.respondWith(
-      caches.match(request).then(response => {
-        return response || fetch(request).then(response => {
-          if (response && response.status === 200) {
-            const cache = caches.open(CACHE_NAME);
-            cache.then(c => c.put(request, response.clone()));
-          }
-          return response;
-        });
+  event.respondWith(
+    fetch(event.request)
+      .catch(() => {
+        // On network error, return offline response
+        return new Response(
+          JSON.stringify({ error: 'Offline' }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
       })
-    );
-    return;
-  }
-
-  // Network first for everything else
-  event.respondWith(fetch(request).catch(() => caches.match(request)));
+  );
 });
