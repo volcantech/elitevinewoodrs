@@ -20,6 +20,12 @@ export async function getAllVehicles(req: Request, res: Response) {
     const validSortFields = ['name', 'price', 'category', 'trunk_weight', 'seats', 'particularity'];
     const isSorting = sortField && validSortFields.includes(sortField);
 
+    // Validate category against whitelist to prevent SQL injection
+    const validCategories = ['Compact', 'Berline', 'SUV', 'Sport', 'Luxe', 'Utilitaire', 'Familiale', 'Électrique', 'Hybride'];
+    if (categoryValue && !validCategories.includes(categoryValue)) {
+      return res.status(400).json({ error: "⚠️ Catégorie invalide" });
+    }
+
     // Build ORDER BY clause - move to database for performance
     let orderByClause = 'ORDER BY category, name';
     if (isSorting) {
