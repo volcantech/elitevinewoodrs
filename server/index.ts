@@ -90,22 +90,9 @@ export function createServer() {
     next();
   });
 
-  // CORS - Restrict origins
-  const allowedOrigins = [
-    'http://localhost:5000',
-    'http://localhost:5173',
-    'http://localhost:3000',
-    process.env.PRODUCTION_URL || '',
-  ].filter(Boolean);
-  
+  // CORS - Allow requests
   app.use(cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS not allowed'));
-      }
-    },
+    origin: true, // Allow all origins for now - frontend and backend on same Render instance
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
