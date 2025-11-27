@@ -45,17 +45,20 @@ export function createServer() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        scriptSrc: ["'self'"], // Removed 'unsafe-inline' - prevents XSS
+        styleSrc: ["'self'", "https://fonts.googleapis.com"], // Removed 'unsafe-inline'
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: ["'self'"],
         frameSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
       },
     },
     frameguard: { action: 'deny' },
     xssFilter: true,
     noSniff: true,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   }));
 
   // Compression middleware - compress all responses for faster transfer
@@ -86,9 +89,22 @@ export function createServer() {
     next();
   });
 
-  // CORS - Allow all origins in development, restrict in production
+  // CORS - Restrict origins
+  const allowedOrigins = [
+    'http://localhost:5000',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    process.env.PRODUCTION_URL || '',
+  ].filter(Boolean);
+  
   app.use(cors({
-    origin: true,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS not allowed'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
