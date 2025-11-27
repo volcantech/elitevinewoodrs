@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ export function ActivityLogDetailsDialog({ details }: ActivityLogDetailsDialogPr
       <DialogContent className="bg-slate-900 border-amber-600/30 text-white max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-amber-400">Détails des modifications</DialogTitle>
+          <DialogDescription>Liste des anciens et nouveaux modifiés</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 max-h-[500px] overflow-y-auto">
           {Object.entries(details).map(([key, value]: [string, any]) => (
