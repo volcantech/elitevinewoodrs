@@ -183,17 +183,14 @@ export default function Admin() {
       if (order) params.append("sortOrder", order);
 
       const url = `/api/vehicles?${params.toString()}`;
-      console.log("🔍 Recherche:", { searchQuery, selectedCategory, sort, order, page, limit });
       
       const response = await fetch(url, { credentials: "include" });
       if (!response.ok) throw new Error(`Failed to fetch vehicles: ${response.status}`);
       const data = await response.json();
-      console.log("✅ Résultats:", data.vehicles?.length, "/ Total:", data.total);
       setVehicles(data.vehicles || []);
       setTotalVehicles(data.total || 0);
       setCurrentPage(page);
     } catch (error) {
-      console.error("❌ Erreur lors de la récupération des véhicules :", error);
       toast.error("❌ Erreur lors du chargement des véhicules");
       setVehicles([]);
     } finally {
