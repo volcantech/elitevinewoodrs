@@ -29,16 +29,13 @@ export function useVehiclesCache() {
   return useQuery({
     queryKey: ["vehicles"],
     queryFn: async () => {
-      console.log("🔄 [Cache] Récupération des véhicules à partir de l'API...");
       const response = await fetch("/api/vehicles?limit=1000");
       if (!response.ok) throw new Error("Failed to fetch vehicles");
       const data = await response.json();
-      // L'API retourne un array ou un objet avec propriété vehicles
       const vehicles = Array.isArray(data) ? data : (data.vehicles || data.data || []);
-      console.log("✅ [Cache] Véhicules récupérés depuis l'API - " + vehicles.length + " vehicules chargés");
       return vehicles.map(transformVehicle);
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - pendant ce temps, les données ne sont pas "stale" et on les récupère du cache
-    gcTime: 10 * 60 * 1000, // 10 minutes - après ce temps, le cache est complètement supprimé
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }
