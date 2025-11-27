@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { authenticatedFetch } from "@/lib/api";
 import { UserPermissions } from "@/types/permissions";
 import { useQuery } from "@tanstack/react-query";
+import { transformVehicle as transformVehicleData } from "@/lib/vehicleCache";
 
 interface Vehicle {
   id: number;
@@ -31,7 +32,8 @@ interface Vehicle {
   category: string;
   price: number;
   trunk_weight: number;
-  image_url: string;
+  image: string;
+  image_url?: string;
   seats: number;
   particularity: string | null;
 }
@@ -187,7 +189,12 @@ export default function Admin() {
       const response = await fetch(url, { credentials: "include" });
       if (!response.ok) throw new Error(`Failed to fetch vehicles: ${response.status}`);
       const data = await response.json();
-      setVehicles(data.vehicles || []);
+      // Transform image_url to image field
+      const transformedVehicles = (data.vehicles || []).map((v: any) => ({
+        ...v,
+        image: v.image_url || v.image
+      }));
+      setVehicles(transformedVehicles);
       setTotalVehicles(data.total || 0);
       setCurrentPage(page);
     } catch (error) {
