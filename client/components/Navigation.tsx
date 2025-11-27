@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import { Car } from "lucide-react";
 import { CartDrawer } from "@/components/CartDrawer";
 
-export default function Navigation() {
+function NavigationComponent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
