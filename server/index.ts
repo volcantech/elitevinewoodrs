@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import compression from "compression";
+import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
 import { handleDemo } from "./routes/demo";
@@ -63,11 +64,21 @@ export function createServer() {
     threshold: 1024,
   }));
 
-  // Add cache control headers middleware
+  // Add ETag and cache control headers middleware
   app.use((req, res, next) => {
-    if (req.method === 'GET' && !req.path.startsWith('/api/auth')) {
-      res.set('Cache-Control', 'public, max-age=300');
-    }
+    const originalJson = res.json;
+    res.json = function(data) {
+      if (req.method === 'GET' && !req.path.startsWith('/api/auth')) {
+        const etag = `"${crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')}"`;
+        res.set('ETag', etag);
+        res.set('Cache-Control', 'public, max-age=300');
+        
+        if (req.get('if-none-match') === etag) {
+          return res.status(304).end();
+        }
+      }
+      return originalJson.call(this, data);
+    };
     next();
   });
 
