@@ -64,8 +64,12 @@ export function createServer() {
     threshold: 1024,
   }));
 
-  // Add ETag and cache control headers middleware
+  // Add ETag and cache control headers middleware + performance headers
   app.use((req, res, next) => {
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('X-Frame-Options', 'DENY');
+    res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
     const originalJson = res.json;
     res.json = function(data) {
       if (req.method === 'GET' && !req.path.startsWith('/api/auth')) {
