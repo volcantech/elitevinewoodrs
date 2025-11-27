@@ -20,79 +20,41 @@ export async function getAllVehicles(req: Request, res: Response) {
     const validSortFields = ['name', 'price', 'category', 'trunk_weight', 'seats', 'particularity'];
     const isSorting = sortField && validSortFields.includes(sortField);
 
-    console.log("🔍 API Recherche:", { searchStr, categoryValue, page, limit, offset, sortField, order, isSorting });
-
-    // Build ORDER BY clause
+    // Build ORDER BY clause - move to database for performance
     let orderByClause = 'ORDER BY category, name';
     if (isSorting) {
       orderByClause = `ORDER BY ${sortField} ${order}`;
     }
 
-    let vehicles;
-    let countResult;
-    
+    // Build WHERE clause
+    let whereClause = '1=1';
     if (searchStr && categoryValue) {
-      vehicles = await sql`
-        SELECT * FROM vehicles 
-        WHERE LOWER(name) LIKE LOWER(${'%' + searchStr + '%'}) AND category = ${categoryValue}
-      `;
-      countResult = await sql`
-        SELECT COUNT(*) as total FROM vehicles 
-        WHERE LOWER(name) LIKE LOWER(${'%' + searchStr + '%'}) AND category = ${categoryValue}
-      `;
+      whereClause = `LOWER(name) LIKE LOWER('${searchStr.replace(/'/g, "''")}%') AND category = '${categoryValue}'`;
     } else if (searchStr) {
-      vehicles = await sql`
-        SELECT * FROM vehicles 
-        WHERE LOWER(name) LIKE LOWER(${'%' + searchStr + '%'})
-      `;
-      countResult = await sql`
-        SELECT COUNT(*) as total FROM vehicles 
-        WHERE LOWER(name) LIKE LOWER(${'%' + searchStr + '%'})
-      `;
+      whereClause = `LOWER(name) LIKE LOWER('${searchStr.replace(/'/g, "''")}%')`;
     } else if (categoryValue) {
-      vehicles = await sql`
-        SELECT * FROM vehicles 
-        WHERE category = ${categoryValue}
-      `;
-      countResult = await sql`
-        SELECT COUNT(*) as total FROM vehicles 
-        WHERE category = ${categoryValue}
-      `;
-    } else {
-      vehicles = await sql`
-        SELECT * FROM vehicles
-      `;
-      countResult = await sql`
-        SELECT COUNT(*) as total FROM vehicles
-      `;
+      whereClause = `category = '${categoryValue}'`;
     }
 
-    // Sort in memory
-    if (isSorting) {
-      vehicles.sort((a: any, b: any) => {
-        let aVal: any = a[sortField];
-        let bVal: any = b[sortField];
+    // Execute query with pagination and sorting at DB level (much faster!)
+    const query = `
+      SELECT * FROM vehicles 
+      WHERE ${whereClause}
+      ${orderByClause}
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    
+    const countQuery = `SELECT COUNT(*) as total FROM vehicles WHERE ${whereClause}`;
+    
+    const [vehicles, countResult] = await Promise.all([
+      sql(query),
+      sql(countQuery)
+    ]);
 
-        if (aVal === null) aVal = "";
-        if (bVal === null) bVal = "";
-
-        if (typeof aVal === "string") {
-          aVal = aVal.toLowerCase();
-          bVal = (bVal as string).toLowerCase();
-        }
-
-        if (aVal < bVal) return order === 'ASC' ? -1 : 1;
-        if (aVal > bVal) return order === 'ASC' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    // Apply pagination with offset to handle multiple pages correctly
-    const finalVehicles = vehicles.slice(offset, offset + limit);
     const total = countResult[0]?.total || 0;
 
-    console.log("✅ Résultats API:", finalVehicles.length, "/ Total:", total, "/ Page:", page, "/ Offset:", offset, "/ Sorting:", isSorting);
-    res.json({ vehicles: finalVehicles, total });
+    res.set('Cache-Control', 'public, max-age=300');
+    res.json({ vehicles, total });
   } catch (error) {
     console.error("❌ Erreur véhicules :", error);
     res.status(500).json({ error: "⚠️ Impossible de charger le catalogue. Veuillez réessayer" });
@@ -241,6 +203,7 @@ export async function getCategories(req: Request, res: Response) {
   try {
     const vehicles = await sql`SELECT DISTINCT category FROM vehicles ORDER BY category`;
     const categories = vehicles.map((v: any) => v.category);
+    res.set('Cache-Control', 'public, max-age=3600');
     res.json(categories);
   } catch (error) {
     console.error("❌ Erreur lors de la récupération des catégories :", error);
