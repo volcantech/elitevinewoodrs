@@ -2,5 +2,5 @@ services:
   - type: web
     name: elite-vinewood-auto
     runtime: node
-    buildCommand: npm ci --legacy-peer-deps && npx vite build
+    buildCommand: npm ci --legacy-peer-deps && npx vite build --config vite.config.build.ts
     startCommand: npm start
