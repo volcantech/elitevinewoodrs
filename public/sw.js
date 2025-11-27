@@ -1,9 +1,7 @@
 const CACHE_NAME = 'elite-vinewood-v1';
-const API_CACHE = 'elite-vinewood-api-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/assets/'
 ];
 
 self.addEventListener('install', event => {
@@ -22,7 +20,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE) {
+          if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
@@ -36,29 +34,28 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Don't cache API requests - always fetch fresh
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      caches.open(API_CACHE).then(cache => {
-        return fetch(request).then(response => {
-          cache.put(request, response.clone());
-          return response;
-        }).catch(() => {
-          return cache.match(request);
-        });
-      })
-    );
-  } else {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Cache-first for assets
+  if (request.method === 'GET' && (url.pathname.includes('/assets/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css'))) {
     event.respondWith(
       caches.match(request).then(response => {
         return response || fetch(request).then(response => {
-          if (request.method === 'GET' && !request.url.includes('localhost')) {
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(request, response.clone());
-            });
+          if (response && response.status === 200) {
+            const cache = caches.open(CACHE_NAME);
+            cache.then(c => c.put(request, response.clone()));
           }
           return response;
         });
       })
     );
+    return;
   }
+
+  // Network first for everything else
+  event.respondWith(fetch(request).catch(() => caches.match(request)));
 });
