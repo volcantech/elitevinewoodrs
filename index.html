@@ -22,7 +22,7 @@
     <script type="module" src="/client/App.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register('/sw.js?v=' + Date.now()).catch(() => {});
       }
     </script>
   </body>
