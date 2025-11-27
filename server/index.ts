@@ -56,15 +56,9 @@ export function createServer() {
     noSniff: true,
   }));
 
-  // CORS - Restreint au domaine
-  const allowedOrigins = [
-    'http://localhost:5000',
-    'http://localhost:3000',
-    process.env.DOMAIN_URL || 'https://elite-vinewood-auto.replit.dev'
-  ];
-
+  // CORS - Allow all origins in development, restrict in production
   app.use(cors({
-    origin: allowedOrigins,
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -170,7 +164,7 @@ export function createServer() {
 // Start server when run directly (not imported as a module)
 if (import.meta.url === `file://${process.argv[1]}`) {
   const app = createServer();
-  const port = process.env.PORT || 5000;
+  const port = parseInt(process.env.PORT || "5000", 10);
   app.listen(port, "0.0.0.0", () => {
     console.log(`✅ Server running on http://0.0.0.0:${port}`);
   });
