@@ -6,6 +6,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default {
   build: {
     outDir: 'dist/spa',
+    minify: 'esbuild',
+  },
+  esbuild: {
+    jsx: 'automatic',
+    jsxImportSource: 'react',
   },
   resolve: {
     alias: {
