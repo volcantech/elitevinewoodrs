@@ -7,7 +7,10 @@ export default {
   build: {
     outDir: 'dist/spa',
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
+      external: (id) => {
+        // Externalize all node_modules packages
+        return id.startsWith('react') || id.startsWith('@') || /^[a-z]/.test(id);
+      },
     },
   },
   resolve: {
