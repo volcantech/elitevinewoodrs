@@ -146,7 +146,13 @@ export function createServer() {
   app.get("/api/activity-logs", adminAuth, requireLogsPermission, getActivityLogs);
   app.get("/api/activity-logs/paginated", adminAuth, requireLogsPermission, getActivityLogsPaginatedHandler);
 
-  // Serve static files from dist/spa (client build)
+  return app;
+}
+
+export function createProductionServer() {
+  const app = createServer();
+  
+  // Serve static files from dist/spa (client build) - only in production
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const spaDir = path.join(__dirname, "../dist/spa");
@@ -163,7 +169,7 @@ export function createServer() {
 
 // Start server when run directly (not imported as a module)
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const app = createServer();
+  const app = createProductionServer();
   const port = parseInt(process.env.PORT || "5000", 10);
   app.listen(port, "0.0.0.0", () => {
     console.log(`✅ Server running on http://0.0.0.0:${port}`);
