@@ -137,7 +137,7 @@ export function VehicleAdminList({
                     className="flex items-center gap-4 bg-slate-800/50 border border-amber-600/30 rounded-lg p-4 hover:bg-slate-800/70 transition-all group"
                   >
                     <img
-                      src={vehicle.image || vehicle.image_url}
+                      src={vehicle.image_url}
                       alt={vehicle.name}
                       className="w-24 h-14 object-cover rounded-md border border-amber-600/30 flex-shrink-0"
                     />
