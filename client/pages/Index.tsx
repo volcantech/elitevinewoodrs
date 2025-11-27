@@ -3,7 +3,9 @@ import { ArrowRight, Sparkles, Shield, Zap } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 
-export default function Index() {
+import { memo } from "react";
+
+function IndexComponent() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navigation />
@@ -183,3 +185,5 @@ export default function Index() {
     </div>
   );
 }
+
+export default memo(IndexComponent);
