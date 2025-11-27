@@ -9,7 +9,6 @@ export default {
   build: {
     outDir: 'dist/spa',
     sourcemap: false,
-    minify: 'terser',
   },
   resolve: {
     alias: {
