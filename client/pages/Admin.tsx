@@ -76,10 +76,10 @@ export default function Admin() {
       setIsAuthenticated(true);
       sessionStorage.setItem("adminUser", JSON.stringify(user));
       toast.success(`Bienvenue ${user.username}`);
-      fetchCategories("");
-      fetchVehicles("");
+      
+      // Parallélize data fetching
+      Promise.all([fetchCategories(""), fetchVehicles("")]);
     } catch (error) {
-      console.error("❌ Erreur de connexion :", error);
       toast.error("❌ Erreur lors de l'authentification");
     } finally {
       setIsLoginLoading(false);
