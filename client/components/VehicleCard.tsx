@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Vehicle } from "@/data/vehicles";
 import { Package, DollarSign, Users, Sparkles, ShoppingCart, Plus, Minus, Check, Scale } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ interface VehicleCardProps {
   onCompare?: (vehicle: Vehicle) => void;
 }
 
-export default function VehicleCard({ vehicle, onCompare }: VehicleCardProps) {
+function VehicleCardComponent({ vehicle, onCompare }: VehicleCardProps) {
   const { addToCart, isInCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [showQuantity, setShowQuantity] = useState(false);
@@ -149,6 +149,3 @@ export default function VehicleCard({ vehicle, onCompare }: VehicleCardProps) {
           </div>
         )}
       </div>
-    </div>
-  );
-}
