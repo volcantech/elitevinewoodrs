@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import path from "path";
 import { fileURLToPath } from "url";
 import { handleDemo } from "./routes/demo";
@@ -54,6 +55,12 @@ export function createServer() {
     frameguard: { action: 'deny' },
     xssFilter: true,
     noSniff: true,
+  }));
+
+  // Compression middleware - compress all responses for faster transfer
+  app.use(compression({
+    level: 6,
+    threshold: 1024,
   }));
 
   // Add cache control headers middleware
