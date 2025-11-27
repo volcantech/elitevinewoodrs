@@ -14,7 +14,9 @@ const VEHICLES_PER_PAGE = 9;
 
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
 
-export default function Catalog() {
+import { memo, useCallback } from "react";
+
+function CatalogComponent() {
   const { data: vehicles = [], isLoading, isFetching } = useVehiclesCache();
   
   
@@ -100,9 +102,13 @@ export default function Catalog() {
     setDisplayedCount(VEHICLES_PER_PAGE);
   };
 
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     setDisplayedCount(prev => prev + VEHICLES_PER_PAGE);
-  };
+  }, []);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -147,7 +153,7 @@ export default function Catalog() {
                     type="text"
                     placeholder="Rechercher un véhicule par nom..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                     className="w-full bg-gray-800/50 border border-gray-700 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 transition-all"
                   />
                 </div>
@@ -547,3 +553,5 @@ export default function Catalog() {
     </div>
   );
 }
+
+export default memo(CatalogComponent);
