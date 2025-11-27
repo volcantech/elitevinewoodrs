@@ -1,16 +1,20 @@
-import { fileURLToPath } from 'url';
-import path from 'path';
+export default async (env) => {
+  const { fileURLToPath } = await import('url');
+  const path = await import('path');
+  const react = (await import('@vitejs/plugin-react-swc')).default;
+  
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-export default {
-  build: {
-    outDir: 'dist/spa',
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './client'),
-      '@shared': path.resolve(__dirname, './shared'),
+  return {
+    build: {
+      outDir: 'dist/spa',
     },
-  },
+    plugins: [react()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './client'),
+        '@shared': path.resolve(__dirname, './shared'),
+      },
+    },
+  };
 };
