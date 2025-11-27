@@ -121,7 +121,7 @@ export default function Admin() {
       }
     };
 
-    const interval = setInterval(verifyUserExists, 10000);
+    const interval = setInterval(verifyUserExists, 30000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
