@@ -110,3 +110,5 @@ function NavigationComponent() {
     </nav>
   );
 }
+
+export default memo(NavigationComponent);
