@@ -1,16 +1,15 @@
 import { fileURLToPath } from 'url';
 import path from 'path';
+import react from '@vitejs/plugin-react-swc';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
+  plugins: [react()],
   build: {
     outDir: 'dist/spa',
-    rollupOptions: {
-      external: (id) => {
-        return id.startsWith('react') || id.startsWith('@') || /^[a-z]/.test(id);
-      },
-    },
+    sourcemap: false,
+    minify: 'terser',
   },
   resolve: {
     alias: {
