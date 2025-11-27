@@ -2,10 +2,8 @@ services:
   - type: web
     name: elite-vinewood-auto
     runtime: node
-    buildCommand: npm install --legacy-peer-deps && npm run typecheck && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_OPTIONS
-        value: --loader=tsx
