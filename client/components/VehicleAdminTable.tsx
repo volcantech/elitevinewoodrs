@@ -203,12 +203,9 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
                 >
                   <TableCell className="py-3 px-6">
                     <img
-                      src={vehicle.image_url}
+                      src={vehicle.image || vehicle.image_url}
                       alt={vehicle.name}
                       className="w-20 h-12 object-cover rounded-md border border-amber-600/30 hover:border-amber-500/60 transition-all shadow-md"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder.svg";
-                      }}
                     />
                   </TableCell>
                   <TableCell className="font-semibold text-white">{vehicle.name}</TableCell>
