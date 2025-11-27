@@ -214,9 +214,6 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
                   src={imagePreview}
                   alt="Preview"
                   className="w-full h-40 object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/placeholder.svg";
-                  }}
                 />
               </div>
             )}
