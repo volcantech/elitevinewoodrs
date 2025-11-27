@@ -189,12 +189,7 @@ export default function Admin() {
       const response = await fetch(url, { credentials: "include" });
       if (!response.ok) throw new Error(`Failed to fetch vehicles: ${response.status}`);
       const data = await response.json();
-      // Transform image_url to image field
-      const transformedVehicles = (data.vehicles || []).map((v: any) => ({
-        ...v,
-        image: v.image_url || v.image
-      }));
-      setVehicles(transformedVehicles);
+      setVehicles(data.vehicles || []);
       setTotalVehicles(data.total || 0);
       setCurrentPage(page);
     } catch (error) {
