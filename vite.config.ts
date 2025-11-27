@@ -7,7 +7,7 @@ export default {
   build: {
     outDir: 'dist/spa',
     rollupOptions: {
-      external: ['react/jsx-runtime'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
     },
   },
   resolve: {
