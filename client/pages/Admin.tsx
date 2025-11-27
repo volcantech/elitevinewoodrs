@@ -53,8 +53,11 @@ export default function Admin() {
   const [totalVehicles, setTotalVehicles] = useState(0);
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("");
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (isLoginLoading) return;
+    setIsLoginLoading(true);
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -78,6 +81,8 @@ export default function Admin() {
     } catch (error) {
       console.error("❌ Erreur de connexion :", error);
       toast.error("❌ Erreur lors de l'authentification");
+    } finally {
+      setIsLoginLoading(false);
     }
   };
 
