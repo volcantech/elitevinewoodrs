@@ -11,12 +11,12 @@
     ]
   },
   "scripts": {
-    "dev": "vite --config vite.dev.config.ts",
-    "build": "vite build",
+    "dev": "npx vite --config vite.dev.config.ts",
+    "build": "npx vite build",
     "start": "node --loader tsx server/index.ts",
-    "test": "vitest --run",
-    "format.fix": "prettier --write .",
-    "typecheck": "tsc"
+    "test": "npx vitest --run",
+    "format.fix": "npx prettier --write .",
+    "typecheck": "npx tsc"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
