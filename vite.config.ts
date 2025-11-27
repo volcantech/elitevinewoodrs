@@ -4,12 +4,10 @@ import path from 'path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
-  root: __dirname,
   build: {
     outDir: 'dist/spa',
     rollupOptions: {
       external: (id) => {
-        // Externalize all node_modules packages
         return id.startsWith('react') || id.startsWith('@') || /^[a-z]/.test(id);
       },
     },
