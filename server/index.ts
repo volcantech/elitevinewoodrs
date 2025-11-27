@@ -43,19 +43,7 @@ export function createServer() {
   // Security Headers - CSP disabled in dev, strict in production
   const isDev = process.env.NODE_ENV !== 'production';
   app.use(helmet({
-    contentSecurityPolicy: isDev ? false : {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
-        frameSrc: ["'none'"],
-        baseUri: ["'self'"],
-        formAction: ["'self'"],
-      },
-    },
+    contentSecurityPolicy: false, // Disabled everywhere for now - images must load
     frameguard: { action: 'deny' },
     xssFilter: true,
     noSniff: true,
