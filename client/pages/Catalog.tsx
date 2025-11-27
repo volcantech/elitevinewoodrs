@@ -17,12 +17,6 @@ type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "t
 export default function Catalog() {
   const { data: vehicles = [], isLoading, isFetching } = useVehiclesCache();
   
-  // Log cache status
-  useEffect(() => {
-    if (!isFetching && vehicles.length > 0) {
-      console.log("✨ [Catalogue] Utilisation des véhicules stockés - " + vehicles.length + " véhicules chargés depuis le cache");
-    }
-  }, [vehicles.length, isFetching]);
   
   const [selectedCategory, setSelectedCategory] =
     useState<string | null>(null);
