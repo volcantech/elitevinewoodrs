@@ -46,6 +46,9 @@ export function ActivityLogsView() {
 
   useEffect(() => {
     fetchLogs();
+    // Auto-refresh logs toutes les 5 secondes
+    const interval = setInterval(() => fetchLogs(), 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const formatDate = (dateString: string) => {
