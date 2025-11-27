@@ -11,12 +11,12 @@
     ]
   },
   "scripts": {
-    "dev": "node ./node_modules/vite/bin/vite.js --config vite.dev.config.ts",
-    "build": "node ./node_modules/vite/bin/vite.js build",
+    "dev": "vite --config vite.dev.config.ts",
+    "build": "vite build",
     "start": "node --loader tsx server/index.ts",
-    "test": "node ./node_modules/vitest/vitest.mjs --run",
-    "format.fix": "node ./node_modules/prettier/bin/prettier.cjs --write .",
-    "typecheck": "node ./node_modules/typescript/bin/tsc"
+    "test": "vitest --run",
+    "format.fix": "prettier --write .",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
