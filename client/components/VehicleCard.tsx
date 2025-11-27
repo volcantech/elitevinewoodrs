@@ -43,6 +43,8 @@ export default function VehicleCard({ vehicle, onCompare }: VehicleCardProps) {
         <img
           src={vehicle.image}
           alt={vehicle.name}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
