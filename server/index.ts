@@ -40,16 +40,17 @@ export function createServer() {
   // Trust proxy - Required for rate limiting to work correctly behind reverse proxy
   app.set('trust proxy', 1);
 
-  // Security Headers
+  // Security Headers - CSP disabled in dev, strict in production
+  const isDev = process.env.NODE_ENV !== 'production';
   app.use(helmet({
-    contentSecurityPolicy: {
+    contentSecurityPolicy: isDev ? false : {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline for Vite HMR in dev
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline for Vite HMR
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "ws://localhost:*", "http://localhost:*"], // Allow Vite HMR websocket
+        connectSrc: ["'self'"],
         frameSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
