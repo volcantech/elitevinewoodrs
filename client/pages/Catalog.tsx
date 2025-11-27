@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
+import { memo, useCallback, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { Search, ChevronDown, Package, DollarSign, X, Users, ArrowUpDown, Sparkles } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
@@ -13,9 +14,6 @@ import { CompareDialog } from "@/components/CompareDialog";
 const VEHICLES_PER_PAGE = 9;
 
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
-
-import { memo, useCallback, useState } from "react";
-import { FixedSizeGrid as Grid } from "react-window";
 
 function CatalogComponent() {
   const { data: vehicles = [], isLoading, isFetching } = useVehiclesCache();
@@ -110,13 +108,6 @@ function CatalogComponent() {
   const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value);
   }, []);
-
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      // Debounce handled, filtering happens in useMemo
-    }, 300);
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-black text-white">
