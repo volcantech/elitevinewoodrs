@@ -81,13 +81,20 @@ export async function login(req: Request, res: Response) {
 }
 
 export async function getCurrentUser(req: Request, res: Response) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "❌ Authentification requise" });
+  // Get token from cookie first (preferred for secure httpOnly cookies)
+  let token = (req as any).cookies?.adminToken;
+  
+  // Fallback to Authorization header if cookie not present
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7);
+    }
   }
 
-  const token = authHeader.substring(7);
+  if (!token) {
+    return res.status(401).json({ error: "❌ Authentification requise" });
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
