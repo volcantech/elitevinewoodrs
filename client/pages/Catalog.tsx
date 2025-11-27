@@ -14,7 +14,8 @@ const VEHICLES_PER_PAGE = 9;
 
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
 
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
+import { FixedSizeGrid as Grid } from "react-window";
 
 function CatalogComponent() {
   const { data: vehicles = [], isLoading, isFetching } = useVehiclesCache();
@@ -480,21 +481,22 @@ function CatalogComponent() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visibleVehicles.map((vehicle) => (
-                  <VehicleCard
-                    key={vehicle.id}
-                    vehicle={vehicle}
-                    onCompare={(v) => {
-                      const emptyIndex = compareVehicles.findIndex((v) => v === null);
-                      if (emptyIndex !== -1) {
-                        const newCompare = [...compareVehicles];
-                        newCompare[emptyIndex] = v;
-                        setCompareVehicles(newCompare);
-                      } else {
-                        setCompareVehicles([v, null, null, null]);
-                      }
-                      setIsCompareOpen(true);
-                    }}
-                  />
+                  <div key={vehicle.id} style={{ minHeight: 0 }}>
+                    <VehicleCard
+                      vehicle={vehicle}
+                      onCompare={(v) => {
+                        const emptyIndex = compareVehicles.findIndex((v) => v === null);
+                        if (emptyIndex !== -1) {
+                          const newCompare = [...compareVehicles];
+                          newCompare[emptyIndex] = v;
+                          setCompareVehicles(newCompare);
+                        } else {
+                          setCompareVehicles([v, null, null, null]);
+                        }
+                        setIsCompareOpen(true);
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
 
