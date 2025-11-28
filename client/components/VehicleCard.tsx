@@ -132,16 +132,16 @@ export default function VehicleCard({ vehicle, onCompare }: VehicleCardProps) {
           <div className="flex flex-col gap-2 md:flex-row w-full">
             <Button
               onClick={() => setShowQuantity(true)}
-              className="flex-1 h-9 px-2 py-0 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold transition-all text-xs md:text-sm rounded"
+              className="flex-1 h-12 md:h-9 px-2 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold transition-all text-sm md:text-sm rounded"
             >
-              <ShoppingCart className="h-3 w-3 mr-1" />
+              <ShoppingCart className="h-4 w-4 mr-1" />
               <span>Ajouter</span>
             </Button>
             <Button
               onClick={handleCompare}
-              className="flex-1 h-9 px-2 py-0 bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 font-bold transition-all text-xs md:text-sm rounded"
+              className="flex-1 h-12 md:h-9 px-2 py-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 font-bold transition-all text-sm md:text-sm rounded"
             >
-              <Scale className="h-3 w-3 mr-1" />
+              <Scale className="h-4 w-4 mr-1" />
               <span>Comparer</span>
             </Button>
           </div>
