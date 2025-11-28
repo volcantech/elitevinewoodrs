@@ -353,8 +353,8 @@ export default function Catalog() {
 
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-semibold pointer-events-none">
-                          $
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-medium pointer-events-none">
+                          Min
                         </span>
                         <input
                           type="text"
@@ -364,13 +364,16 @@ export default function Catalog() {
                             const num = parseInt(value, 10) || 0;
                             setMinBudget(Math.min(num, maxBudget));
                           }}
-                          placeholder="Min"
-                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-7 pr-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
+                          placeholder="0"
+                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-10 pr-6 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
                         />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400 font-semibold pointer-events-none">
+                          $
+                        </span>
                       </div>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-semibold pointer-events-none">
-                          $
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-medium pointer-events-none">
+                          Max
                         </span>
                         <input
                           type="text"
@@ -380,9 +383,12 @@ export default function Catalog() {
                             const num = parseInt(value, 10) || 15000000;
                             setMaxBudget(Math.max(num, minBudget));
                           }}
-                          placeholder="Max"
-                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-7 pr-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
+                          placeholder="15000000"
+                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-10 pr-6 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
                         />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400 font-semibold pointer-events-none">
+                          $
+                        </span>
                       </div>
                     </div>
                   </div>
