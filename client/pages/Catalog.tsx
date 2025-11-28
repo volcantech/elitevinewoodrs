@@ -352,26 +352,38 @@ export default function Catalog() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <input
-                        type="text"
-                        value={formatPrice(minBudget)}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\./g, '');
-                          const num = parseInt(value, 10) || 0;
-                          setMinBudget(Math.min(num, maxBudget));
-                        }}
-                        className="bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
-                      />
-                      <input
-                        type="text"
-                        value={formatPrice(maxBudget)}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\./g, '');
-                          const num = parseInt(value, 10) || 15000000;
-                          setMaxBudget(Math.max(num, minBudget));
-                        }}
-                        className="bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
-                      />
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-semibold pointer-events-none">
+                          $
+                        </span>
+                        <input
+                          type="text"
+                          value={minBudget}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            const num = parseInt(value, 10) || 0;
+                            setMinBudget(Math.min(num, maxBudget));
+                          }}
+                          placeholder="Min"
+                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-7 pr-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
+                        />
+                      </div>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-semibold pointer-events-none">
+                          $
+                        </span>
+                        <input
+                          type="text"
+                          value={maxBudget}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            const num = parseInt(value, 10) || 15000000;
+                            setMaxBudget(Math.max(num, minBudget));
+                          }}
+                          placeholder="Max"
+                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg pl-7 pr-2 py-1.5 text-white text-center focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30"
+                        />
+                      </div>
                     </div>
                   </div>
 
