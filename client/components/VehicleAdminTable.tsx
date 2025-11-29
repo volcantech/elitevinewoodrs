@@ -61,7 +61,7 @@ interface VehicleAdminTableProps {
 type SortField = "name" | "price" | "category" | "trunk_weight" | "seats" | "particularity";
 type SortOrder = "asc" | "desc";
 
-const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique"];
+const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting"];
 
 export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSort, currentSortField, currentSortOrder = "asc" }: VehicleAdminTableProps) {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
