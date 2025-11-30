@@ -94,12 +94,11 @@ export function CompareDialog({
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-white mb-1">{vehicle.name}</h3>
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
-                    {vehicle.pageCatalog !== null && vehicle.pageCatalog !== undefined && categoryMaxPages[vehicle.category] && (
+                    {vehicle.pageCatalog !== null && vehicle.pageCatalog !== undefined && categoryMaxPages[vehicle.category] ? (
                       <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30">
                         {vehicle.category} - Page {vehicle.pageCatalog}/{categoryMaxPages[vehicle.category]}
                       </Badge>
-                    )}
-                    {!vehicle.pageCatalog && vehicle.pageCatalog !== 0 && (
+                    ) : (
                       <p className="text-sm text-gray-400">{vehicle.category}</p>
                     )}
                   </div>
