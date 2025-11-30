@@ -46,6 +46,7 @@ interface Vehicle {
   image_url: string;
   seats: number;
   particularity: string | null;
+  page_catalog?: number | null;
 }
 
 interface VehicleAdminTableProps {
@@ -62,6 +63,11 @@ type SortField = "name" | "price" | "category" | "trunk_weight" | "seats" | "par
 type SortOrder = "asc" | "desc";
 
 const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting"];
+
+const CATEGORY_MAX_PAGES: { [key: string]: number } = {
+  "Compacts": 15, "Coupes": 17, "Motos": 61, "Muscle": 66, "SUVs": 41,
+  "Sedans": 34, "Sports": 90, "Sports classics": 44, "Super": 55, "Vans": 24
+};
 
 export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSort, currentSortField, currentSortOrder = "asc" }: VehicleAdminTableProps) {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
@@ -135,9 +141,22 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
       const price = typeof formData.price === "string" ? parsePrice(formData.price) : formData.price;
       const trunkWeight = typeof formData.trunk_weight === "string" ? parseInt(formData.trunk_weight, 10) : formData.trunk_weight;
       const seats = typeof formData.seats === "string" ? parseInt(formData.seats, 10) : formData.seats;
+      const pageCatalog = (formData as any).page_catalog ? parseInt((formData as any).page_catalog, 10) : null;
       
       // Convert "Aucune" to null for particularity
       const particularity = formData.particularity === "Aucune" || !formData.particularity ? null : formData.particularity;
+
+      // Log page catalog changes
+      const oldPageCatalog = editingVehicle.page_catalog;
+      if (pageCatalog !== oldPageCatalog) {
+        if (pageCatalog !== null && oldPageCatalog !== null) {
+          console.log(`📄 Modification page du catalogue: ${formData.name} (${formData.category}) - Ancien: Page ${oldPageCatalog} → Nouveau: Page ${pageCatalog}`);
+        } else if (pageCatalog !== null && oldPageCatalog === null) {
+          console.log(`📄 Ajout page du catalogue: ${formData.name} (${formData.category}) - Page ${pageCatalog}`);
+        } else if (pageCatalog === null && oldPageCatalog !== null) {
+          console.log(`📄 Suppression page du catalogue: ${formData.name} (${formData.category}) - Ancienne page: ${oldPageCatalog}`);
+        }
+      }
 
       const response = await authenticatedFetch(`/api/vehicles/${editingVehicle.id}`, token, {
         method: "PUT",
@@ -149,6 +168,7 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
           image_url: formData.image_url,
           seats: seats || 2,
           particularity: particularity,
+          page_catalog: pageCatalog,
         }),
       });
 
@@ -213,7 +233,13 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
                   </TableCell>
                   <TableCell className="font-semibold text-white">{vehicle.name}</TableCell>
                   <TableCell className="text-amber-300 font-bold">{formatPrice(vehicle.price)}</TableCell>
-                  <TableCell className="text-amber-100">{vehicle.category}</TableCell>
+                  <TableCell className="text-amber-100">
+                    {vehicle.page_catalog !== null && vehicle.page_catalog !== undefined && CATEGORY_MAX_PAGES[vehicle.category] ? (
+                      <span>{vehicle.category} - Page {vehicle.page_catalog}/{CATEGORY_MAX_PAGES[vehicle.category]}</span>
+                    ) : (
+                      <span>{vehicle.category}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-white">{vehicle.trunk_weight} kg</TableCell>
                   <TableCell className="text-white">{vehicle.seats}</TableCell>
                   <TableCell className="text-amber-100">
@@ -269,23 +295,35 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
                 className="bg-slate-800/50 border-amber-600/30 text-white placeholder:text-slate-400 focus:border-amber-500 focus:ring-amber-500/20"
               />
             </div>
-            <div className="grid gap-3">
-              <Label className="text-amber-300 font-semibold">Catégorie</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => handleInputChange("category", value)}
-              >
-                <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-amber-600/30">
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat} className="text-white">
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-3">
+                <Label className="text-amber-300 font-semibold">Catégorie</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => handleInputChange("category", value)}
+                >
+                  <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-amber-600/30">
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat} className="text-white">
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-3">
+                <Label className="text-amber-300 font-semibold">Page du catalogue</Label>
+                <Input
+                  type="text"
+                  value={(formData as any).page_catalog || ""}
+                  onChange={(e) => handleInputChange("page_catalog" as any, e.target.value)}
+                  placeholder="Ex: 5"
+                  className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="grid gap-3">
