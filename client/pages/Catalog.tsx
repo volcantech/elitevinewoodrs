@@ -12,20 +12,30 @@ import { CompareDialog } from "@/components/CompareDialog";
 
 const VEHICLES_PER_PAGE = 9;
 
-// Fallback max pages in case API is slower to load
-const FALLBACK_CATEGORY_MAX_PAGES = {
-  "Compacts": 15, "Coupes": 17, "Motos": 61, "Muscle": 66, "SUVs": 41,
-  "Sedans": 34, "Sports": 90, "Sports classics": 44, "Super": 55, "Vans": 24
-};
-
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
 
 export default function Catalog() {
   const { data: vehicles = [], isLoading, isFetching } = useVehiclesCache();
   const { data: apiCategoryMaxPages = {} } = useCategoryMaxPages();
   
-  // Merge API data with fallback to ensure badges always display
-  const categoryMaxPages = { ...FALLBACK_CATEGORY_MAX_PAGES, ...apiCategoryMaxPages };
+  // Calculate category max pages dynamically from actual vehicle data
+  const calculateCategoryMaxPages = () => {
+    const counts: { [key: string]: number } = {};
+    vehicles.forEach(v => {
+      counts[v.category] = (counts[v.category] || 0) + 1;
+    });
+    
+    const maxPages: { [key: string]: number } = {};
+    Object.entries(counts).forEach(([category, count]) => {
+      maxPages[category] = Math.ceil(count / VEHICLES_PER_PAGE);
+    });
+    return maxPages;
+  };
+  
+  const calculatedCategoryMaxPages = useMemo(() => calculateCategoryMaxPages(), [vehicles.length]);
+  
+  // Merge API data with calculated to ensure badges always display and stay updated
+  const categoryMaxPages = { ...calculatedCategoryMaxPages, ...apiCategoryMaxPages };
   
   // Log cache status
   useEffect(() => {
