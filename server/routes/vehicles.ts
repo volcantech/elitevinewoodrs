@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { neon } from "@netlify/neon";
 import { logActivity } from "../services/activityLog";
 
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
+const sql = neon(process.env.DATABASE_URL!);
 
 export async function getAllVehicles(req: Request, res: Response) {
   try {
@@ -117,15 +117,15 @@ export async function getVehicleById(req: Request, res: Response) {
 
 export async function createVehicle(req: Request, res: Response) {
   try {
-    const { name, category, price, trunk_weight, image_url, seats, particularity } = req.body;
+    const { name, category, price, trunk_weight, image_url, seats, particularity, page_catalog } = req.body;
 
     if (!name || !category || !price || trunk_weight === undefined || !image_url || seats === undefined) {
       return res.status(400).json({ error: "⚠️ Tous les champs du véhicule sont obligatoires (nom, catégorie, prix, capacité coffre, image, places)" });
     }
 
     const [vehicle] = await sql`
-      INSERT INTO vehicles (name, category, price, trunk_weight, image_url, seats, particularity)
-      VALUES (${name}, ${category}, ${price}, ${trunk_weight}, ${image_url}, ${seats}, ${particularity || null})
+      INSERT INTO vehicles (name, category, price, trunk_weight, image_url, seats, particularity, page_catalog)
+      VALUES (${name}, ${category}, ${price}, ${trunk_weight}, ${image_url}, ${seats}, ${particularity || null}, ${page_catalog || null})
       RETURNING *
     `;
 
@@ -142,7 +142,8 @@ export async function createVehicle(req: Request, res: Response) {
         "Prix": { old: "N/A", new: `${price}$` },
         "Places": { old: "N/A", new: seats },
         "Capacité coffre": { old: "N/A", new: `${trunk_weight}kg` },
-        "Particularité": { old: "N/A", new: particularity || "Aucune" }
+        "Particularité": { old: "N/A", new: particularity || "Aucune" },
+        "Page du catalogue": { old: "N/A", new: page_catalog !== null && page_catalog !== undefined ? `Page ${page_catalog}` : "Aucune" }
       },
       (req.user as any)?.unique_id || null,
       req.ip || "unknown"
@@ -158,7 +159,7 @@ export async function createVehicle(req: Request, res: Response) {
 export async function updateVehicle(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const { name, category, price, trunk_weight, image_url, seats, particularity } = req.body;
+    const { name, category, price, trunk_weight, image_url, seats, particularity, page_catalog } = req.body;
 
     if (!name || !category || !price || trunk_weight === undefined || !image_url || seats === undefined) {
       return res.status(400).json({ error: "⚠️ Tous les champs du véhicule sont obligatoires (nom, catégorie, prix, capacité coffre, image, places)" });
@@ -169,7 +170,7 @@ export async function updateVehicle(req: Request, res: Response) {
 
     const [vehicle] = await sql`
       UPDATE vehicles
-      SET name = ${name}, category = ${category}, price = ${price}, trunk_weight = ${trunk_weight}, image_url = ${image_url}, seats = ${seats}, particularity = ${particularity || null}
+      SET name = ${name}, category = ${category}, price = ${price}, trunk_weight = ${trunk_weight}, image_url = ${image_url}, seats = ${seats}, particularity = ${particularity || null}, page_catalog = ${page_catalog || null}
       WHERE id = ${id}
       RETURNING *
     `;
@@ -186,6 +187,7 @@ export async function updateVehicle(req: Request, res: Response) {
     if (oldVehicle?.trunk_weight !== trunk_weight) changes["Capacité coffre"] = { old: `${oldVehicle?.trunk_weight}kg`, new: `${trunk_weight}kg` };
     if (oldVehicle?.seats !== seats) changes["Places"] = { old: oldVehicle?.seats, new: seats };
     if (oldVehicle?.particularity !== particularity) changes["Particularité"] = { old: oldVehicle?.particularity || "Aucune", new: particularity || "Aucune" };
+    if (oldVehicle?.page_catalog !== page_catalog) changes["Page du catalogue"] = { old: oldVehicle?.page_catalog !== null && oldVehicle?.page_catalog !== undefined ? `Page ${oldVehicle?.page_catalog}` : "Aucune", new: page_catalog !== null && page_catalog !== undefined ? `Page ${page_catalog}` : "Aucune" };
 
     await logActivity(
       (req.user as any)?.userId || null,
@@ -226,7 +228,8 @@ export async function deleteVehicle(req: Request, res: Response) {
         "Prix": { old: `${vehicle.price}$`, new: "Supprimé" },
         "Places": { old: vehicle.seats, new: "Supprimé" },
         "Capacité coffre": { old: `${vehicle.trunk_weight}kg`, new: "Supprimé" },
-        "Particularité": { old: vehicle.particularity || "Aucune", new: "Supprimé" }
+        "Particularité": { old: vehicle.particularity || "Aucune", new: "Supprimé" },
+        "Page du catalogue": { old: vehicle.page_catalog !== null && vehicle.page_catalog !== undefined ? `Page ${vehicle.page_catalog}` : "Aucune", new: "Supprimé" }
       }
     );
 
@@ -245,5 +248,25 @@ export async function getCategories(req: Request, res: Response) {
   } catch (error) {
     console.error("❌ Erreur lors de la récupération des catégories :", error);
     res.status(500).json({ error: "⚠️ Impossible de charger les catégories" });
+  }
+}
+
+export async function getCategoryMaxPages(req: Request, res: Response) {
+  try {
+    const result = await sql`
+      SELECT category, MAX(page_catalog) as max_page 
+      FROM vehicles 
+      WHERE page_catalog IS NOT NULL
+      GROUP BY category 
+      ORDER BY category
+    `;
+    const maxPages: { [key: string]: number } = {};
+    result.forEach((row: any) => {
+      maxPages[row.category] = row.max_page;
+    });
+    res.json(maxPages);
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des pages max :", error);
+    res.status(500).json({ error: "⚠️ Impossible de charger les pages max" });
   }
 }
