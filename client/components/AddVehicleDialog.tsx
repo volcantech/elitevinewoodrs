@@ -69,7 +69,8 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
       const trunkWeight = parseInt(formData.trunk_weight, 10) || 100;
       const seats = parseInt(formData.seats, 10) || 2;
 
-      const pageNum = formData.page_catalog ? parseInt(formData.page_catalog, 10) : null;
+      const parsedPageNum = formData.page_catalog?.trim() ? parseInt(formData.page_catalog, 10) : null;
+      const pageNum = parsedPageNum && !isNaN(parsedPageNum) ? parsedPageNum : null;
       
       if (pageNum !== null) {
         console.log(`📄 Ajout de véhicule avec page du catalogue: ${formData.name} - Page ${pageNum} (Catégorie: ${formData.category})`);
@@ -78,9 +79,11 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
       const response = await authenticatedFetch("/api/vehicles", token, {
         method: "POST",
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          category: formData.category,
           price,
           trunk_weight: trunkWeight,
+          image_url: formData.image_url,
           seats,
           particularity: formData.particularity === "Aucune" ? null : formData.particularity,
           page_catalog: pageNum,
