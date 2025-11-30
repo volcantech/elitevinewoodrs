@@ -141,7 +141,8 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
       const price = typeof formData.price === "string" ? parsePrice(formData.price) : formData.price;
       const trunkWeight = typeof formData.trunk_weight === "string" ? parseInt(formData.trunk_weight, 10) : formData.trunk_weight;
       const seats = typeof formData.seats === "string" ? parseInt(formData.seats, 10) : formData.seats;
-      const pageCatalog = (formData as any).page_catalog ? parseInt((formData as any).page_catalog, 10) : null;
+      const parsedPageNum = (formData as any).page_catalog?.trim() ? parseInt((formData as any).page_catalog, 10) : null;
+      const pageCatalog = parsedPageNum && !isNaN(parsedPageNum) ? parsedPageNum : null;
       
       // Convert "Aucune" to null for particularity
       const particularity = formData.particularity === "Aucune" || !formData.particularity ? null : formData.particularity;
