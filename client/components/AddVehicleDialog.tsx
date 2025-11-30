@@ -47,6 +47,7 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
     image_url: "",
     seats: "2",
     particularity: "Aucune",
+    page_catalog: "",
   });
   const [imagePreview, setImagePreview] = useState("");
 
@@ -68,6 +69,12 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
       const trunkWeight = parseInt(formData.trunk_weight, 10) || 100;
       const seats = parseInt(formData.seats, 10) || 2;
 
+      const pageNum = formData.page_catalog ? parseInt(formData.page_catalog, 10) : null;
+      
+      if (pageNum !== null) {
+        console.log(`📄 Ajout de véhicule avec page du catalogue: ${formData.name} - Page ${pageNum} (Catégorie: ${formData.category})`);
+      }
+      
       const response = await authenticatedFetch("/api/vehicles", token, {
         method: "POST",
         body: JSON.stringify({
@@ -76,6 +83,7 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
           trunk_weight: trunkWeight,
           seats,
           particularity: formData.particularity === "Aucune" ? null : formData.particularity,
+          page_catalog: pageNum,
         }),
       });
 
@@ -93,6 +101,7 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
         image_url: "",
         seats: "2",
         particularity: "Aucune",
+        page_catalog: "",
       });
       setImagePreview("");
       onVehicleAdded();
@@ -132,22 +141,37 @@ export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehic
             />
           </div>
 
-          <div className="grid gap-3">
-            <Label htmlFor="category" className="text-amber-300 font-semibold">
-              Catégorie *
-            </Label>
-            <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-              <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20">
-                <SelectValue placeholder="Sélectionnez une catégorie" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-amber-600/30">
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat} className="text-white">
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-3">
+              <Label htmlFor="category" className="text-amber-300 font-semibold">
+                Catégorie *
+              </Label>
+              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                <SelectTrigger className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20">
+                  <SelectValue placeholder="Sélectionnez une catégorie" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-amber-600/30">
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat} className="text-white">
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="page_catalog" className="text-amber-300 font-semibold">
+                Page du catalogue
+              </Label>
+              <Input
+                id="page_catalog"
+                type="text"
+                placeholder="Ex: 5"
+                value={formData.page_catalog}
+                onChange={(e) => handleInputChange("page_catalog", e.target.value)}
+                className="bg-slate-800/50 border-amber-600/30 text-white focus:border-amber-500 focus:ring-amber-500/20"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
