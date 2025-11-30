@@ -34,7 +34,10 @@ interface Vehicle {
   image_url: string;
   seats: number;
   particularity: string | null;
+  page_catalog?: number | null;
 }
+
+const VEHICLES_PER_PAGE = 9;
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -53,6 +56,22 @@ export default function Admin() {
   const [totalVehicles, setTotalVehicles] = useState(0);
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("");
+
+  // Calculate dynamic category max pages
+  const calculateCategoryMaxPages = () => {
+    const counts: { [key: string]: number } = {};
+    vehicles.forEach(v => {
+      counts[v.category] = (counts[v.category] || 0) + 1;
+    });
+    
+    const maxPages: { [key: string]: number } = {};
+    Object.entries(counts).forEach(([category, count]) => {
+      maxPages[category] = Math.ceil(count / VEHICLES_PER_PAGE);
+    });
+    return maxPages;
+  };
+
+  const categoryMaxPages = calculateCategoryMaxPages();
 
   const handleLogin = async () => {
     try {
@@ -377,6 +396,7 @@ export default function Admin() {
                   }}
                   currentSortField={sortBy}
                   currentSortOrder={sortOrder as "asc" | "desc"}
+                  categoryMaxPages={categoryMaxPages}
                 />
                 
                 {vehicles.length > 0 && (
