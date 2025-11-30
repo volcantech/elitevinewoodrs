@@ -18,6 +18,7 @@ interface CompareDialogProps {
   onOpenChange: (open: boolean) => void;
   onRemoveVehicle: (index: number) => void;
   onSelectVehicle: (vehicle: Vehicle) => void;
+  categoryMaxPages?: { [key: string]: number };
 }
 
 export function CompareDialog({
@@ -27,6 +28,7 @@ export function CompareDialog({
   onOpenChange,
   onRemoveVehicle,
   onSelectVehicle,
+  categoryMaxPages = {},
 }: CompareDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -35,12 +37,6 @@ export function CompareDialog({
     price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "$";
 
   const filledVehicles = vehicles.filter((v) => v !== null);
-  
-  // Get max pages for categories
-  const categoryMaxPages: { [key: string]: number } = {
-    "Compacts": 15, "Coupes": 17, "Motos": 61, "Muscle": 66, "SUVs": 41,
-    "Sedans": 34, "Sports": 90, "Sports classics": 44, "Super": 55, "Vans": 24
-  };
   
   // Get already selected vehicle IDs
   const selectedIds = new Set(vehicles.map((v) => v?.id).filter((id) => id));
@@ -94,7 +90,7 @@ export function CompareDialog({
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-white mb-1">{vehicle.name}</h3>
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
-                    {vehicle.pageCatalog !== null && vehicle.pageCatalog !== undefined && categoryMaxPages[vehicle.category] ? (
+                    {vehicle.pageCatalog !== null && vehicle.pageCatalog !== undefined ? (
                       <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30">
                         {vehicle.category} - Page {vehicle.pageCatalog}
                       </Badge>
