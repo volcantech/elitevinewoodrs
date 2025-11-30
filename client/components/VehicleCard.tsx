@@ -65,7 +65,7 @@ export default function VehicleCard({ vehicle, onCompare, categoryMaxPages }: Ve
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {vehicle.pageCatalog !== null && vehicle.pageCatalog !== undefined && maxPage ? (
             <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 flex items-center gap-1">
-              {vehicle.category} - Page {vehicle.pageCatalog}/{maxPage}
+              {vehicle.category} - Page {vehicle.pageCatalog}
             </Badge>
           ) : (
             <p className="text-sm text-gray-400">{vehicle.category}</p>
