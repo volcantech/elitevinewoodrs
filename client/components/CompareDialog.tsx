@@ -96,7 +96,7 @@ export function CompareDialog({
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
                     {vehicle.pageCatalog !== null && vehicle.pageCatalog !== undefined && categoryMaxPages[vehicle.category] ? (
                       <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30">
-                        {vehicle.category} - Page {vehicle.pageCatalog}/{categoryMaxPages[vehicle.category]}
+                        {vehicle.category} - Page {vehicle.pageCatalog}
                       </Badge>
                     ) : (
                       <p className="text-sm text-gray-400">{vehicle.category}</p>
