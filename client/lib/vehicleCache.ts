@@ -10,6 +10,11 @@ export interface VehicleAPI {
   image_url: string;
   seats: number;
   particularity: string | null;
+  page_catalog: number | null;
+}
+
+export interface CategoryMaxPages {
+  [category: string]: number;
 }
 
 export function transformVehicle(v: VehicleAPI): Vehicle {
@@ -22,6 +27,7 @@ export function transformVehicle(v: VehicleAPI): Vehicle {
     image: v.image_url,
     seats: v.seats,
     particularity: v.particularity,
+    pageCatalog: v.page_catalog,
   };
 }
 
@@ -33,12 +39,25 @@ export function useVehiclesCache() {
       const response = await fetch("/api/vehicles?limit=1000");
       if (!response.ok) throw new Error("Failed to fetch vehicles");
       const data = await response.json();
-      // L'API retourne un array ou un objet avec propriété vehicles
       const vehicles = Array.isArray(data) ? data : (data.vehicles || data.data || []);
       console.log("✅ [Cache] Véhicules récupérés depuis l'API - " + vehicles.length + " vehicules chargés");
       return vehicles.map(transformVehicle);
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - pendant ce temps, les données ne sont pas "stale" et on les récupère du cache
-    gcTime: 10 * 60 * 1000, // 10 minutes - après ce temps, le cache est complètement supprimé
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useCategoryMaxPages() {
+  return useQuery({
+    queryKey: ["categoryMaxPages"],
+    queryFn: async () => {
+      const response = await fetch("/api/vehicles/max-pages");
+      if (!response.ok) throw new Error("Failed to fetch category max pages");
+      const data: CategoryMaxPages = await response.json();
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
