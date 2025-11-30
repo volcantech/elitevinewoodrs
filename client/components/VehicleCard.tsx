@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { Vehicle } from "@/data/vehicles";
-import { Package, DollarSign, Users, Sparkles, ShoppingCart, Plus, Minus, Check, Scale } from "lucide-react";
+import { Package, DollarSign, Users, Sparkles, ShoppingCart, Plus, Minus, Check, Scale, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
+import { CategoryMaxPages } from "@/lib/vehicleCache";
 
 interface VehicleCardProps {
   vehicle: Vehicle;
   onCompare?: (vehicle: Vehicle) => void;
+  categoryMaxPages?: CategoryMaxPages;
 }
 
-export default function VehicleCard({ vehicle, onCompare }: VehicleCardProps) {
+export default function VehicleCard({ vehicle, onCompare, categoryMaxPages }: VehicleCardProps) {
   const { addToCart, isInCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [showQuantity, setShowQuantity] = useState(false);
+  
+  const maxPage = categoryMaxPages?.[vehicle.category] || null;
 
   const handleCompare = () => {
     onCompare?.(vehicle);
@@ -58,10 +62,17 @@ export default function VehicleCard({ vehicle, onCompare }: VehicleCardProps) {
         <h3 className="text-xl font-bold text-white mb-1 group-hover:text-amber-400 transition-colors">
           {vehicle.name}
         </h3>
-        <div className="flex items-center gap-2 mb-4">
-          <p className="text-sm text-gray-400">{vehicle.category}</p>
-          {vehicle.particularity && (
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          {vehicle.pageCatalog !== null && vehicle.pageCatalog !== undefined && maxPage && (
             <Badge variant="secondary" className="text-xs bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30 flex items-center gap-1">
+              {vehicle.category} - Page {vehicle.pageCatalog}/{maxPage}
+            </Badge>
+          )}
+          {!vehicle.pageCatalog && vehicle.pageCatalog !== 0 && (
+            <p className="text-sm text-gray-400">{vehicle.category}</p>
+          )}
+          {vehicle.particularity && (
+            <Badge variant="secondary" className="text-xs bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30 flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               {vehicle.particularity}
             </Badge>
