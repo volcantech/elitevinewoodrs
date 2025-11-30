@@ -7,15 +7,25 @@ import { LoadingCar } from "@/components/LoadingCar";
 import { CATEGORIES, Vehicle, VehicleCategory } from "@/data/vehicles";
 import { Slider } from "@/components/ui/slider";
 import { formatPrice } from "@/lib/priceFormatter";
-import { useVehiclesCache } from "@/lib/vehicleCache";
+import { useVehiclesCache, useCategoryMaxPages } from "@/lib/vehicleCache";
 import { CompareDialog } from "@/components/CompareDialog";
 
 const VEHICLES_PER_PAGE = 9;
+
+// Fallback max pages in case API is slower to load
+const FALLBACK_CATEGORY_MAX_PAGES = {
+  "Compacts": 15, "Coupes": 17, "Motos": 61, "Muscle": 66, "SUVs": 41,
+  "Sedans": 34, "Sports": 90, "Sports classics": 44, "Super": 55, "Vans": 24
+};
 
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
 
 export default function Catalog() {
   const { data: vehicles = [], isLoading, isFetching } = useVehiclesCache();
+  const { data: apiCategoryMaxPages = {} } = useCategoryMaxPages();
+  
+  // Merge API data with fallback to ensure badges always display
+  const categoryMaxPages = { ...FALLBACK_CATEGORY_MAX_PAGES, ...apiCategoryMaxPages };
   
   // Log cache status
   useEffect(() => {
@@ -495,6 +505,7 @@ export default function Catalog() {
                   <VehicleCard
                     key={vehicle.id}
                     vehicle={vehicle}
+                    categoryMaxPages={categoryMaxPages}
                     onCompare={(v) => {
                       const emptyIndex = compareVehicles.findIndex((v) => v === null);
                       if (emptyIndex !== -1) {
