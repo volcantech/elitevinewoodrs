@@ -57,6 +57,7 @@ interface VehicleAdminTableProps {
   onSort?: (field: SortField, order: SortOrder) => void;
   currentSortField?: string;
   currentSortOrder?: SortOrder;
+  categoryMaxPages?: { [key: string]: number };
 }
 
 type SortField = "name" | "price" | "category" | "trunk_weight" | "seats" | "particularity";
@@ -64,12 +65,12 @@ type SortOrder = "asc" | "desc";
 
 const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting"];
 
-const CATEGORY_MAX_PAGES: { [key: string]: number } = {
+const DEFAULT_CATEGORY_MAX_PAGES: { [key: string]: number } = {
   "Compacts": 15, "Coupes": 17, "Motos": 61, "Muscle": 66, "SUVs": 41,
   "Sedans": 34, "Sports": 90, "Sports classics": 44, "Super": 55, "Vans": 24
 };
 
-export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSort, currentSortField, currentSortOrder = "asc" }: VehicleAdminTableProps) {
+export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSort, currentSortField, currentSortOrder = "asc", categoryMaxPages = DEFAULT_CATEGORY_MAX_PAGES }: VehicleAdminTableProps) {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<Vehicle>>({});
@@ -243,8 +244,8 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
                   <TableCell className="font-semibold text-white">{vehicle.name}</TableCell>
                   <TableCell className="text-amber-300 font-bold">{formatPrice(vehicle.price)}</TableCell>
                   <TableCell className="text-amber-100">
-                    {vehicle.page_catalog !== null && vehicle.page_catalog !== undefined && CATEGORY_MAX_PAGES[vehicle.category] ? (
-                      <span>{vehicle.category} - Page {vehicle.page_catalog}/{CATEGORY_MAX_PAGES[vehicle.category]}</span>
+                    {vehicle.page_catalog !== null && vehicle.page_catalog !== undefined && categoryMaxPages[vehicle.category] ? (
+                      <span>{vehicle.category} - Page {vehicle.page_catalog}/{categoryMaxPages[vehicle.category]}</span>
                     ) : (
                       <span>{vehicle.category}</span>
                     )}
