@@ -244,8 +244,8 @@ export function VehicleAdminTable({ vehicles, categories, token, onRefresh, onSo
                   <TableCell className="font-semibold text-white">{vehicle.name}</TableCell>
                   <TableCell className="text-amber-300 font-bold">{formatPrice(vehicle.price)}</TableCell>
                   <TableCell className="text-amber-100">
-                    {vehicle.page_catalog !== null && vehicle.page_catalog !== undefined && categoryMaxPages[vehicle.category] ? (
-                      <span>{vehicle.category} - Page {vehicle.page_catalog}/{categoryMaxPages[vehicle.category]}</span>
+                    {vehicle.page_catalog !== null && vehicle.page_catalog !== undefined ? (
+                      <span>{vehicle.category} - Page {vehicle.page_catalog}</span>
                     ) : (
                       <span>{vehicle.category}</span>
                     )}
