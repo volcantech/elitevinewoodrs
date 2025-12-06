@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Vehicle } from "@/data/vehicles";
-import { Package, DollarSign, Users, Sparkles, ShoppingCart, Plus, Minus, Check, Scale, BookOpen } from "lucide-react";
+import { Package, DollarSign, Users, Sparkles, ShoppingCart, Plus, Minus, Check, Scale, BookOpen, Building, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -70,10 +70,26 @@ export default function VehicleCard({ vehicle, onCompare, categoryMaxPages }: Ve
           ) : (
             <p className="text-sm text-gray-400">{vehicle.category}</p>
           )}
+          {vehicle.manufacturer && (
+            <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30 flex items-center gap-1">
+              <Building className="w-3 h-3" />
+              {vehicle.manufacturer}
+            </Badge>
+          )}
           {vehicle.particularity && (
             <Badge variant="secondary" className="text-xs bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30 flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               {vehicle.particularity}
+            </Badge>
+          )}
+          {vehicle.realname && (
+            <Badge 
+              variant="secondary" 
+              className="text-xs bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30 flex items-center gap-1 cursor-help"
+              title={`Nom réel: ${vehicle.realname}`}
+            >
+              <Info className="w-3 h-3" />
+              {vehicle.realname}
             </Badge>
           )}
         </div>
