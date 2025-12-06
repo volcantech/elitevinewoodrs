@@ -1,5 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, ChevronDown, Package, DollarSign, X, Users, ArrowUpDown, Sparkles } from "lucide-react";
+import { Search, ChevronDown, Package, DollarSign, X, Users, ArrowUpDown, Sparkles, Building, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import Navigation from "@/components/Navigation";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import VehicleCard from "@/components/VehicleCard";
@@ -11,6 +20,44 @@ import { useVehiclesCache, useCategoryMaxPages } from "@/lib/vehicleCache";
 import { CompareDialog } from "@/components/CompareDialog";
 
 const VEHICLES_PER_PAGE = 9;
+
+const GTA_BRAND_MAPPING: { gta: string; real: string }[] = [
+  { gta: "Albany", real: "Cadillac / Lincoln" },
+  { gta: "Annis", real: "Nissan / Mazda" },
+  { gta: "Benefactor", real: "Mercedes-Benz" },
+  { gta: "BF", real: "Volkswagen" },
+  { gta: "Bollokan", real: "Hyundai" },
+  { gta: "Bravado", real: "Dodge" },
+  { gta: "Brute", real: "GMC" },
+  { gta: "Canis", real: "Jeep" },
+  { gta: "Cheval", real: "Chevrolet" },
+  { gta: "Coil", real: "Tesla" },
+  { gta: "Declasse", real: "Chevrolet" },
+  { gta: "Dewbauchee", real: "Aston Martin" },
+  { gta: "Dinka", real: "Honda / Acura" },
+  { gta: "Enus", real: "Rolls-Royce / Bentley" },
+  { gta: "Grotti", real: "Ferrari / Fiat" },
+  { gta: "Hijak", real: "Audi" },
+  { gta: "Imponte", real: "Pontiac" },
+  { gta: "Karin", real: "Toyota / Subaru" },
+  { gta: "Lampadati", real: "Maserati" },
+  { gta: "Maibatsu", real: "Mitsubishi" },
+  { gta: "Mammoth", real: "Hummer" },
+  { gta: "Nagasaki", real: "Kawasaki" },
+  { gta: "Obey", real: "Audi" },
+  { gta: "Ocelot", real: "Jaguar / Lotus" },
+  { gta: "Overflod", real: "Koenigsegg" },
+  { gta: "Pegassi", real: "Lamborghini / Ducati" },
+  { gta: "Pfister", real: "Porsche" },
+  { gta: "Principe", real: "Ducati / Aprilia" },
+  { gta: "Progen", real: "McLaren / Pagani" },
+  { gta: "Truffade", real: "Bugatti" },
+  { gta: "Ubermacht", real: "BMW" },
+  { gta: "Vapid", real: "Ford" },
+  { gta: "Vulcar", real: "Volvo" },
+  { gta: "Weeny", real: "Mini / Smart" },
+  { gta: "Western", real: "Harley-Davidson" },
+];
 
 type SortOption = "alphabetical" | "price-asc" | "price-desc" | "trunk-asc" | "trunk-desc";
 
@@ -52,6 +99,7 @@ export default function Catalog() {
   const [maxBudget, setMaxBudget] = useState<number>(15000000);
   const [selectedSeats, setSelectedSeats] = useState<number | null>(null);
   const [selectedParticularity, setSelectedParticularity] = useState<string | null>(null);
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string | null>(null);
   const [displayedCount, setDisplayedCount] = useState(VEHICLES_PER_PAGE);
   const [sortBy, setSortBy] = useState<SortOption>("alphabetical");
   const [compareVehicles, setCompareVehicles] = useState<(Vehicle | null)[]>([null, null, null, null]);
@@ -70,7 +118,8 @@ export default function Catalog() {
       const matchesBudget = vehicle.price >= minBudget && vehicle.price <= maxBudget;
       const matchesSeats = !selectedSeats || vehicle.seats === selectedSeats;
       const matchesParticularity = !selectedParticularity || vehicle.particularity === selectedParticularity;
-      return matchesCategory && matchesSearch && matchesWeight && matchesBudget && matchesSeats && matchesParticularity;
+      const matchesManufacturer = !selectedManufacturer || vehicle.manufacturer === selectedManufacturer;
+      return matchesCategory && matchesSearch && matchesWeight && matchesBudget && matchesSeats && matchesParticularity && matchesManufacturer;
     });
 
     // Apply sorting
@@ -92,7 +141,7 @@ export default function Catalog() {
     });
 
     return sorted;
-  }, [vehicles, selectedCategory, searchQuery, minWeight, minBudget, maxBudget, selectedSeats, selectedParticularity, sortBy]);
+  }, [vehicles, selectedCategory, searchQuery, minWeight, minBudget, maxBudget, selectedSeats, selectedParticularity, selectedManufacturer, sortBy]);
 
   const visibleVehicles = useMemo(() => {
     return filteredVehicles.slice(0, displayedCount);
@@ -108,11 +157,19 @@ export default function Catalog() {
     return Array.from(new Set(particularities)).sort();
   }, [vehicles]);
 
-  const hasActiveFilters = selectedCategory || minWeight || minBudget > 0 || maxBudget < 15000000 || selectedSeats || selectedParticularity;
+  // Get unique manufacturers (excluding null)
+  const availableManufacturers = useMemo(() => {
+    const manufacturers = vehicles
+      .map(v => v.manufacturer)
+      .filter((m): m is string => m !== null);
+    return Array.from(new Set(manufacturers)).sort();
+  }, [vehicles]);
+
+  const hasActiveFilters = selectedCategory || minWeight || minBudget > 0 || maxBudget < 15000000 || selectedSeats || selectedParticularity || selectedManufacturer;
 
   useEffect(() => {
     setDisplayedCount(VEHICLES_PER_PAGE);
-  }, [selectedCategory, searchQuery, minWeight, minBudget, maxBudget, selectedSeats, selectedParticularity, sortBy]);
+  }, [selectedCategory, searchQuery, minWeight, minBudget, maxBudget, selectedSeats, selectedParticularity, selectedManufacturer, sortBy]);
 
   const resetAllFilters = () => {
     setSelectedCategory(null);
@@ -122,6 +179,7 @@ export default function Catalog() {
     setMaxBudget(15000000);
     setSelectedSeats(null);
     setSelectedParticularity(null);
+    setSelectedManufacturer(null);
     setSortBy("alphabetical");
     setDisplayedCount(VEHICLES_PER_PAGE);
   };
@@ -181,8 +239,8 @@ export default function Catalog() {
 
           {/* Filters Section */}
           <div className="mb-8 space-y-4">
-                {/* Category, Sort and Particularity in same row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Category, Manufacturer, Sort and Particularity in same row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Category Filter */}
                   <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-amber-500/20 rounded-xl p-4 shadow-lg">
                     <div className="flex items-center gap-2 mb-2">
@@ -206,6 +264,70 @@ export default function Catalog() {
                         return (
                           <option key={category} value={category}>
                             {category} ({count})
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  {/* Manufacturer Filter */}
+                  <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-amber-500/20 rounded-xl p-4 shadow-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                          <Building className="w-4 h-4 text-amber-400" />
+                        </div>
+                        <label className="font-semibold text-white text-sm">
+                          Marque
+                        </label>
+                      </div>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+                            title="Correspondances marques GTA / IRL"
+                          >
+                            <Info className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-amber-600/30 shadow-2xl">
+                          <DialogHeader>
+                            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent flex items-center gap-2">
+                              <Building className="w-5 h-5 text-amber-400" />
+                              Marques GTA → Vie réelle
+                            </DialogTitle>
+                          </DialogHeader>
+                          <ScrollArea className="h-[400px] pr-4">
+                            <div className="grid gap-2 py-2">
+                              {GTA_BRAND_MAPPING.map((brand) => (
+                                <div
+                                  key={brand.gta}
+                                  className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2 border border-amber-600/20 hover:border-amber-500/40 transition-all"
+                                >
+                                  <span className="font-semibold text-amber-300">{brand.gta}</span>
+                                  <span className="text-gray-300">{brand.real}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    <select
+                      value={selectedManufacturer || ""}
+                      onChange={(e) => setSelectedManufacturer(e.target.value || null)}
+                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer hover:bg-gray-700"
+                    >
+                      <option value="">Toutes les marques</option>
+                      {availableManufacturers.map((manufacturer: string) => {
+                        const count = vehicles.filter(
+                          (v) => v.manufacturer === manufacturer,
+                        ).length;
+                        return (
+                          <option key={manufacturer} value={manufacturer}>
+                            {manufacturer} ({count})
                           </option>
                         );
                       })}
