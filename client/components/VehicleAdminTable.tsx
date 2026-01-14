@@ -65,7 +65,7 @@ interface VehicleAdminTableProps {
 type SortField = "name" | "price" | "category" | "trunk_weight" | "seats" | "particularity";
 type SortOrder = "asc" | "desc";
 
-const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting"];
+const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting", "Électrique"];
 
 const DEFAULT_CATEGORY_MAX_PAGES: { [key: string]: number } = {
   "Compacts": 15, "Coupes": 17, "Motos": 61, "Muscle": 66, "Off Road": 20, "SUVs": 41,
