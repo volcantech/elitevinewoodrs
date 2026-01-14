@@ -35,7 +35,7 @@ interface AddVehicleDialogProps {
   onVehicleAdded: () => void;
 }
 
-const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting"];
+const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting", "Électrique"];
 
 export function AddVehicleDialog({ categories, token, onVehicleAdded }: AddVehicleDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
