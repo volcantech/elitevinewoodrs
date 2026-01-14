@@ -39,7 +39,7 @@ interface VehicleAdminListProps {
   searchQuery: string;
 }
 
-const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique"];
+const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting", "Électrique"];
 
 export function VehicleAdminList({
   vehicles,
