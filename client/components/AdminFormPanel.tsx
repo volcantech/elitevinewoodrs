@@ -19,7 +19,7 @@ interface AdminFormPanelProps {
   onVehicleAdded: () => void;
 }
 
-const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique"];
+const PARTICULARITY_OPTIONS = ["Aucune", "Les plus rapides", "Drift", "Suspension hydraulique", "Karting", "Électrique"];
 
 export function AdminFormPanel({ categories, token, onVehicleAdded }: AdminFormPanelProps) {
   const [formData, setFormData] = useState({
