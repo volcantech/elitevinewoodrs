@@ -5,10 +5,12 @@ import { sql } from "../lib/db";
 import type { UserPermissions } from "./users";
 import { normalizePermissions } from "./users";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required for authentication");
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET environment variable is required for authentication");
+  }
+  return secret;
 }
 
 export interface JWTPayload {
@@ -53,7 +55,7 @@ export async function login(req: Request, res: Response) {
         permissions: normalizedPerms,
         authenticated: true,
       } as JWTPayload,
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: "24h" }
     );
 
@@ -95,7 +97,7 @@ export async function getCurrentUser(req: Request, res: Response) {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    const decoded = jwt.verify(token, getJwtSecret()) as JWTPayload;
 
     const result = await sql`
       SELECT id, username, permissions
