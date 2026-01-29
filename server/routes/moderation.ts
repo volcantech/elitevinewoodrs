@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
-import { neon } from "@netlify/neon";
+import { sql } from "../lib/db";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
 export async function getAllBannedIds(req: Request, res: Response) {
   try {
@@ -31,20 +29,26 @@ export async function banId(req: Request, res: Response) {
       return res.status(400).json({ error: "⚠️ L'ID unique ne doit contenir que des chiffres" });
     }
 
-    // Check if already banned
     const existingBan = await sql`SELECT reason FROM banned_unique_ids WHERE unique_id = ${uniqueId.trim()}`;
 
-    const [bannedId] = await sql`
+    const bannedResult = await sql`
       INSERT INTO banned_unique_ids (unique_id, reason, banned_by)
       VALUES (${uniqueId.trim()}, ${reason || null}, ${bannedBy})
       ON CONFLICT (unique_id) DO UPDATE SET reason = EXCLUDED.reason, banned_by = EXCLUDED.banned_by, banned_at = CURRENT_TIMESTAMP
       RETURNING *
     `;
+    
+    const bannedId = bannedResult && bannedResult.length > 0 ? bannedResult[0] : null;
+
+    if (!bannedId) {
+      throw new Error("Échec de l'insertion ou de la mise à jour du bannissement");
+    }
 
     const changes: any = {};
-    if (existingBan.length > 0) {
-      if (existingBan[0].reason !== (reason || null)) {
-        changes["Raison"] = { old: existingBan[0].reason || "Aucune", new: reason || "Aucune" };
+    const existingBanList = existingBan || [];
+    if (existingBanList.length > 0) {
+      if (existingBanList[0].reason !== (reason || null)) {
+        changes["Raison"] = { old: existingBanList[0].reason || "Aucune", new: reason || "Aucune" };
       }
       await logActivity(
         (req.user as any)?.userId || null,
