@@ -13,9 +13,6 @@ import {
   updateVehicle,
   deleteVehicle,
   getCategories,
-  getDisabledCategories,
-  disableCategory,
-  enableCategory,
 } from "./routes/vehicles";
 import {
   createOrder,
@@ -108,9 +105,6 @@ export function createServer() {
   // Vehicle API routes - read operations are public, write operations require admin auth + permissions
   app.get("/api/vehicles", publicLimiter, getAllVehicles);
   app.get("/api/vehicles/categories", getCategories);
-  app.get("/api/vehicles/disabled-categories", adminAuth, getDisabledCategories);
-  app.post("/api/vehicles/disable-category", adminAuth, requireVehiclePermission("update"), disableCategory);
-  app.delete("/api/vehicles/enable-category/:category", adminAuth, requireVehiclePermission("update"), enableCategory);
   app.get("/api/vehicles/:id", getVehicleById);
   app.post("/api/vehicles", adminAuth, requireVehiclePermission("create"), mutationLimiter, createVehicle);
   app.put("/api/vehicles/:id", adminAuth, requireVehiclePermission("update"), mutationLimiter, updateVehicle);
@@ -134,9 +128,9 @@ export function createServer() {
     next();
   };
 
-  app.get("/api/moderation/banned-ids", adminAuth, requireModerationPermission("ban_uniqueids"), (req, res) => getAllBannedIds(req, res));
-  app.post("/api/moderation/ban-id", adminAuth, requireModerationPermission("ban_uniqueids"), (req, res) => banId(req, res));
-  app.delete("/api/moderation/ban-id", adminAuth, requireModerationPermission("ban_uniqueids"), (req, res) => unbanId(req, res));
+  app.get("/api/moderation/banned-ids", adminAuth, requireModerationPermission("ban_uniqueids"), getAllBannedIds);
+  app.post("/api/moderation/ban-id", adminAuth, requireModerationPermission("ban_uniqueids"), banId);
+  app.delete("/api/moderation/ban-id", adminAuth, requireModerationPermission("ban_uniqueids"), unbanId);
 
   // Announcements routes - public read, admin write
   app.get("/api/announcements", getAnnouncement);
