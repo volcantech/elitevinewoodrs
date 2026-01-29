@@ -1,6 +1,4 @@
-import { neon } from "@netlify/neon";
-
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
+import { sql } from "../lib/db";
 
 export async function initActivityLogsTable() {
   try {

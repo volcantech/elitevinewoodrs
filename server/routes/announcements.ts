@@ -1,8 +1,6 @@
 import type { Request, Response } from "express";
-import { neon } from "@netlify/neon";
+import { sql } from "../lib/db";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
 export async function initAnnouncementsTable() {
   try {
