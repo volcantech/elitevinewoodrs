@@ -16,10 +16,14 @@ export async function getAllBannedIds(req: Request, res: Response) {
 
 export async function banId(req: Request, res: Response) {
   try {
+    console.log("[v0] banId called with body:", req.body);
+    console.log("[v0] Content-Type:", req.headers['content-type']);
     const { uniqueId, reason } = req.body;
     const bannedBy = req.user?.username || "admin";
+    console.log("[v0] Parsed uniqueId:", uniqueId, "reason:", reason, "bannedBy:", bannedBy);
 
     if (!uniqueId) {
+      console.log("[v0] uniqueId is missing, returning 400");
       return res.status(400).json({ error: "⚠️ ID unique requis" });
     }
 

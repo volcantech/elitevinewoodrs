@@ -128,16 +128,20 @@ export function ModerationAdmin({ token, currentUser, permissions }: ModerationA
     }
 
     try {
+      const bodyData = {
+        uniqueId: newUniqueId.trim(),
+        reason: newReason || null,
+      };
+      console.log("[v0] Sending ban request with body:", bodyData);
       const response = await authenticatedFetch(`/api/moderation/ban-id`, token, {
         method: "POST",
-        body: JSON.stringify({
-          uniqueId: newUniqueId,
-          reason: newReason || null,
-        }),
+        body: JSON.stringify(bodyData),
       });
 
+      console.log("[v0] Ban response status:", response.status);
       if (!response.ok) {
         const errorData = await response.json();
+        console.log("[v0] Ban error response:", errorData);
         throw new Error(errorData.error || "Failed to ban ID");
       }
 
