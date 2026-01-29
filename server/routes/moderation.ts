@@ -29,7 +29,8 @@ export async function banId(req: Request, res: Response) {
       return res.status(400).json({ error: "⚠️ L'ID unique ne doit contenir que des chiffres" });
     }
 
-    const existingBan = await sql`SELECT reason FROM banned_unique_ids WHERE unique_id = ${uniqueId.trim()}`;
+    const existingBanResult = await sql`SELECT reason FROM banned_unique_ids WHERE unique_id = ${uniqueId.trim()}`;
+    const existingBan = existingBanResult || [];
 
     const bannedResult = await sql`
       INSERT INTO banned_unique_ids (unique_id, reason, banned_by)
@@ -45,10 +46,9 @@ export async function banId(req: Request, res: Response) {
     }
 
     const changes: any = {};
-    const existingBanList = existingBan || [];
-    if (existingBanList.length > 0) {
-      if (existingBanList[0].reason !== (reason || null)) {
-        changes["Raison"] = { old: existingBanList[0].reason || "Aucune", new: reason || "Aucune" };
+    if (existingBan.length > 0) {
+      if (existingBan[0].reason !== (reason || null)) {
+        changes["Raison"] = { old: existingBan[0].reason || "Aucune", new: reason || "Aucune" };
       }
       await logActivity(
         (req.user as any)?.userId || null,
