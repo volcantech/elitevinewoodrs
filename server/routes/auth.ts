@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { neon } from "@netlify/neon";
+import { sql, requireDb } from "../lib/db";
 import type { UserPermissions } from "./users";
 import { normalizePermissions } from "./users";
 
@@ -10,8 +10,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required for authentication");
 }
-
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
 export interface JWTPayload {
   userId: number;

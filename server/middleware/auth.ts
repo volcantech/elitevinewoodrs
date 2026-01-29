@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { neon } from "@netlify/neon";
+import { sql, requireDb } from "../lib/db";
 import type { JWTPayload } from "../routes/auth";
 import type { UserPermissions } from "../routes/users";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required for authentication");

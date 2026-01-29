@@ -1,7 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { neon } from "@netlify/neon";
-
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
+import { sql, requireDb } from "../lib/db";
 
 export async function initAuditLogsTable() {
   try {

@@ -1,7 +1,11 @@
 import "dotenv/config";
-import { neon } from "@netlify/neon";
+import { neon } from "@neondatabase/serverless";
 
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
+const databaseUrl = process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL or NETLIFY_DATABASE_URL environment variable is required");
+}
+const sql = neon(databaseUrl);
 
 const vehicleData: Record<string, { manufacturer: string; realModel: string }> = {
   "Asbo": { manufacturer: "Maxwell", realModel: "Vauxhall Corsa" },

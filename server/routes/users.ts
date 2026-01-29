@@ -1,9 +1,7 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { neon } from "@netlify/neon";
+import { sql, requireDb } from "../lib/db";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
 function formatPermissionsReadable(permissions: any): string {
   if (!permissions) return "Aucune permission";

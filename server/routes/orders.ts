@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
-import { neon } from "@netlify/neon";
+import { sql, requireDb } from "../lib/db";
 import { randomUUID } from "crypto";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
 
 export async function initOrdersTables() {
   try {
