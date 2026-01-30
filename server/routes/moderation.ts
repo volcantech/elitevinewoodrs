@@ -1,8 +1,37 @@
 import { Request, Response } from "express";
-import { neon } from "@netlify/neon";
+import { neon } from "@neondatabase/serverless";
 import { logActivity } from "../services/activityLog";
 
-const sql = neon(process.env.NETLIFY_DATABASE_URL!);
+const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
+
+export async function initModerationTables() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS banned_unique_ids (
+        id SERIAL PRIMARY KEY,
+        unique_id VARCHAR(255) NOT NULL,
+        reason TEXT,
+        banned_by VARCHAR(255),
+        banned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    
+    // Add unique constraint separately to ensure it exists
+    await sql`
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'banned_unique_ids_unique_id_key'
+        ) THEN 
+          ALTER TABLE banned_unique_ids ADD CONSTRAINT banned_unique_ids_unique_id_key UNIQUE (unique_id);
+        END IF; 
+      END $$;
+    `;
+    console.log("✅ Moderation tables initialized successfully");
+  } catch (error) {
+    console.error("❌ Erreur lors de l'initialisation des tables de modération :", error);
+  }
+}
 
 export async function getAllBannedIds(req: Request, res: Response) {
   try {
@@ -38,7 +67,7 @@ export async function banId(req: Request, res: Response) {
       INSERT INTO banned_unique_ids (unique_id, reason, banned_by)
       VALUES (${uniqueId.trim()}, ${reason || null}, ${bannedBy})
       ON CONFLICT (unique_id) DO UPDATE SET reason = EXCLUDED.reason, banned_by = EXCLUDED.banned_by, banned_at = CURRENT_TIMESTAMP
-      RETURNING *
+      RETURNING id, unique_id, reason, banned_by, banned_at
     `;
 
     const changes: any = {};
