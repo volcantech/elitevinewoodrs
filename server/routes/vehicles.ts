@@ -5,6 +5,26 @@ import { logActivity } from "../services/activityLog";
 export async function initVehiclesTables() {
   try {
     const sql = getDb();
+    
+    // Create vehicles table first (before categories migration tries to query it)
+    await sql`
+      CREATE TABLE IF NOT EXISTS vehicles (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        price INTEGER NOT NULL,
+        trunk_weight INTEGER NOT NULL,
+        image_url TEXT NOT NULL,
+        seats INTEGER NOT NULL,
+        particularity VARCHAR(100),
+        page_catalog INTEGER,
+        manufacturer VARCHAR(255),
+        realname VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    
     await sql`
       CREATE TABLE IF NOT EXISTS categories (
         id SERIAL PRIMARY KEY,
@@ -24,9 +44,16 @@ export async function initVehiclesTables() {
     `;
 
     // Migration: Insert existing categories from vehicles into categories table
-    const existingVehicles = await sql`SELECT DISTINCT category FROM vehicles`;
+    let existingCategories: string[] = [];
+    try {
+      const existingVehicles = await sql`SELECT DISTINCT category FROM vehicles`;
+      existingCategories = existingVehicles.map(v => v.category).filter(Boolean);
+    } catch {
+      // Table might be empty or query failed, continue with static categories
+    }
+    
     const staticCategories = ["Compacts", "Coupes", "Motos", "Muscle", "Off Road", "SUVs", "Sedans", "Sports", "Sports classics", "Super", "Vans"];
-    const allCategories = [...new Set([...existingVehicles.map(v => v.category), ...staticCategories])];
+    const allCategories = [...new Set([...existingCategories, ...staticCategories])];
 
     for (const catName of allCategories) {
       if (catName) {
