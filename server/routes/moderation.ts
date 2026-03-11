@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../lib/db";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
 
 export async function initModerationTables() {
   try {
+    const sql = getDb();
     await sql`
       CREATE TABLE IF NOT EXISTS banned_unique_ids (
         id SERIAL PRIMARY KEY,
@@ -35,6 +34,7 @@ export async function initModerationTables() {
 
 export async function getAllBannedIds(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const ids = await sql`
       SELECT id, unique_id, reason, banned_by, banned_at FROM banned_unique_ids ORDER BY banned_at DESC
     `;
@@ -60,6 +60,7 @@ export async function banId(req: Request, res: Response) {
       return res.status(400).json({ error: "⚠️ L'ID unique ne doit contenir que des chiffres" });
     }
 
+    const sql = getDb();
     // Check if already banned
     const existingBan = await sql`SELECT reason FROM banned_unique_ids WHERE unique_id = ${uniqueId.trim()}`;
 
@@ -121,6 +122,7 @@ export async function unbanId(req: Request, res: Response) {
       return res.status(400).json({ error: "⚠️ L'ID unique ne doit contenir que des chiffres" });
     }
 
+    const sql = getDb();
     const [result] = await sql`
       DELETE FROM banned_unique_ids WHERE unique_id = ${uniqueId.trim()} RETURNING *
     `;

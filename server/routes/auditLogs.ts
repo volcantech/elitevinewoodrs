@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import { neon } from "@neondatabase/serverless";
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
+import { getDb } from "../lib/db";
 
 export async function getAuditLogs(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { search, searchType } = req.query;
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, parseInt(req.query.limit as string) || 50);

@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../lib/db";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
 
 export async function initVehiclesTables() {
   try {
+    const sql = getDb();
     await sql`
       CREATE TABLE IF NOT EXISTS categories (
         id SERIAL PRIMARY KEY,
@@ -57,6 +56,7 @@ export async function initVehiclesTables() {
 
 export async function getParticularities(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const result = await sql`SELECT * FROM particularities ORDER BY name`;
     res.json(result);
   } catch (error) {
@@ -66,6 +66,7 @@ export async function getParticularities(req: Request, res: Response) {
 
 export async function createParticularity(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { name } = req.body;
     const [p] = await sql`INSERT INTO particularities (name) VALUES (${name}) RETURNING *`;
     
@@ -88,6 +89,7 @@ export async function createParticularity(req: Request, res: Response) {
 
 export async function updateParticularity(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const { name } = req.body;
     const [old] = await sql`SELECT name FROM particularities WHERE id = ${id}`;
@@ -112,6 +114,7 @@ export async function updateParticularity(req: Request, res: Response) {
 
 export async function deleteParticularity(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const [p] = await sql`DELETE FROM particularities WHERE id = ${id} RETURNING *`;
     
@@ -134,6 +137,7 @@ export async function deleteParticularity(req: Request, res: Response) {
 
 export async function getAllVehicles(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { search, category, sortBy, sortOrder } = req.query;
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(1000, parseInt(req.query.limit as string) || 20);
@@ -259,6 +263,7 @@ export async function getAllVehicles(req: Request, res: Response) {
 
 export async function getVehicleById(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const [vehicle] = await sql`SELECT * FROM vehicles WHERE id = ${id}`;
     
@@ -275,6 +280,7 @@ export async function getVehicleById(req: Request, res: Response) {
 
 export async function createVehicle(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { name, category, price, trunk_weight, image_url, seats, particularity, page_catalog, manufacturer, realname } = req.body;
 
     if (!name || !category || !price || trunk_weight === undefined || !image_url || seats === undefined) {
@@ -322,6 +328,7 @@ export async function createVehicle(req: Request, res: Response) {
 
 export async function updateVehicle(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const { name, category, price, trunk_weight, image_url, seats, particularity, page_catalog, manufacturer, realname } = req.body;
 
@@ -383,6 +390,7 @@ export async function updateVehicle(req: Request, res: Response) {
 
 export async function deleteVehicle(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const [vehicle] = await sql`DELETE FROM vehicles WHERE id = ${id} RETURNING *`;
 
@@ -422,6 +430,7 @@ export async function deleteVehicle(req: Request, res: Response) {
 
 export async function getCategories(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const isPublic = !req.headers.authorization;
     const categories = isPublic 
       ? await sql`SELECT name FROM categories WHERE is_active = true ORDER BY name`
@@ -440,6 +449,7 @@ export async function getCategories(req: Request, res: Response) {
 
 export async function createCategory(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { name } = req.body;
     if (!name) return res.status(400).json({ error: "Nom requis" });
 
@@ -467,6 +477,7 @@ export async function createCategory(req: Request, res: Response) {
 
 export async function updateCategory(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const { name, is_active } = req.body;
     
@@ -509,6 +520,7 @@ export async function updateCategory(req: Request, res: Response) {
 
 export async function deleteCategory(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const [cat] = await sql`DELETE FROM categories WHERE id = ${id} RETURNING *`;
     
@@ -532,6 +544,7 @@ export async function deleteCategory(req: Request, res: Response) {
 
 export async function getCategoryMaxPages(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const result = await sql`
       SELECT category, MAX(page_catalog) as max_page 
       FROM vehicles 

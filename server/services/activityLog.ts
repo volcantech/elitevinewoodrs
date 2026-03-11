@@ -1,9 +1,8 @@
-import { neon } from "@neondatabase/serverless";
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
+import { getDb } from "../lib/db";
 
 export async function initActivityLogsTable() {
   try {
+    const sql = getDb();
     await sql`
       CREATE TABLE IF NOT EXISTS activity_logs (
         id SERIAL PRIMARY KEY,
@@ -28,6 +27,7 @@ export async function initActivityLogsTable() {
 // Add IP column if it doesn't exist
 export async function addIpColumnIfMissing() {
   try {
+    const sql = getDb();
     await sql`
       ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS admin_ip VARCHAR(45)
     `;
@@ -49,6 +49,7 @@ export async function logActivity(
   adminIp?: string | null
 ) {
   try {
+    const sql = getDb();
     // If adminUniqueId not provided, fetch it from database
     let uniqueId = adminUniqueId;
     if (!uniqueId && adminId) {
@@ -80,6 +81,7 @@ export async function logActivity(
 
 export async function getAllActivityLogs() {
   try {
+    const sql = getDb();
     const logs = await sql`
       SELECT * FROM activity_logs
       ORDER BY created_at DESC
@@ -94,6 +96,7 @@ export async function getAllActivityLogs() {
 
 export async function getActivityLogsPaginated(page: number = 1, pageSize: number = 25) {
   try {
+    const sql = getDb();
     const offset = (page - 1) * pageSize;
     
     const logs = await sql`

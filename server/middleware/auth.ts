@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../lib/db";
 import type { JWTPayload } from "../routes/auth";
 import type { UserPermissions } from "../routes/users";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required for authentication");
@@ -36,6 +35,7 @@ export async function adminAuth(req: Request, res: Response, next: NextFunction)
     // Verify user still exists in database
     // If user has been deleted, reject the token even if it's still valid
     try {
+      const sql = getDb();
       const result = await sql`
         SELECT id, permissions FROM admin_users WHERE id = ${decoded.userId} LIMIT 1
       `;

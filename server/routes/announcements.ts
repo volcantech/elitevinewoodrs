@@ -1,11 +1,10 @@
 import type { Request, Response } from "express";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../lib/db";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
 
 export async function initAnnouncementsTable() {
   try {
+    const sql = getDb();
     await sql`
       CREATE TABLE IF NOT EXISTS announcements (
         id SERIAL PRIMARY KEY,
@@ -23,6 +22,7 @@ export async function initAnnouncementsTable() {
 
 export async function getAnnouncement(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const announcements = await sql`
       SELECT id, content, is_active, created_at, updated_at
       FROM announcements
@@ -41,6 +41,7 @@ export async function updateAnnouncement(req: Request, res: Response) {
   const { content, is_active } = req.body;
 
   try {
+    const sql = getDb();
     // Get old announcement
     const oldAnnouncements = await sql`SELECT content, is_active FROM announcements LIMIT 1`;
     const oldAnnouncement = oldAnnouncements.length > 0 ? oldAnnouncements[0] : null;

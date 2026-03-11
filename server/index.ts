@@ -25,7 +25,7 @@ import {
 } from "./routes/orders";
 import { adminAuth, requireUserPermission, requireVehiclePermission, requireOrderPermission } from "./middleware/auth";
 import { login, getCurrentUser } from "./routes/auth";
-import { getAllUsers, getUserById, createUser, updateUser, deleteUser, initUsersTable } from "./routes/users";
+import { getAllUsers, getUserById, createUser, updateUser, deleteUser, initUsersTable, type UserPermissions } from "./routes/users";
 import { getAllBannedIds, banId, unbanId, initModerationTables } from "./routes/moderation";
 import { getAnnouncement, updateAnnouncement, initAnnouncementsTable } from "./routes/announcements";
 import { getActivityLogs, getActivityLogsPaginatedHandler } from "./routes/activityLogs";

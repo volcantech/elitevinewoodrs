@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../lib/db";
 import type { UserPermissions } from "./users";
 import { normalizePermissions } from "./users";
 
@@ -10,8 +10,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required for authentication");
 }
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
 
 export interface JWTPayload {
   userId: number;
@@ -28,6 +26,7 @@ export async function login(req: Request, res: Response) {
   }
 
   try {
+    const sql = getDb();
     const result = await sql`
       SELECT id, username, access_key, permissions
       FROM admin_users
@@ -97,6 +96,7 @@ export async function getCurrentUser(req: Request, res: Response) {
   }
 
   try {
+    const sql = getDb();
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
 
     const result = await sql`

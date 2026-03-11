@@ -1,9 +1,7 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../lib/db";
 import { logActivity } from "../services/activityLog";
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
 
 function formatPermissionsReadable(permissions: any): string {
   if (!permissions) return "Aucune permission";
@@ -210,6 +208,7 @@ export function normalizePermissions(perms: any): UserPermissions {
 
 export async function initUsersTable() {
   try {
+    const sql = getDb();
     await sql`
       CREATE TABLE IF NOT EXISTS admin_users (
         id SERIAL PRIMARY KEY,
@@ -254,6 +253,7 @@ export async function initUsersTable() {
 
 export async function getAllUsers(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
     const search = (req.query.search as string)?.trim() || "";
@@ -301,6 +301,7 @@ export async function getUserById(req: Request, res: Response) {
   const { id } = req.params;
 
   try {
+    const sql = getDb();
     const users = await sql`
       SELECT id, username, access_key, unique_id, permissions, created_at, updated_at
       FROM admin_users
@@ -334,6 +335,7 @@ export async function createUser(req: Request, res: Response) {
   }
 
   try {
+    const sql = getDb();
     const existingUser = await sql`
       SELECT id FROM admin_users WHERE username = ${username}
     `;
@@ -389,6 +391,7 @@ export async function updateUser(req: Request, res: Response) {
   const { username, access_key, unique_id, permissions } = req.body;
 
   try {
+    const sql = getDb();
     const [oldUser] = await sql`
       SELECT id, username, access_key, unique_id, permissions FROM admin_users WHERE id = ${parseInt(id)}
     `;
@@ -496,6 +499,7 @@ export async function deleteUser(req: Request, res: Response) {
   const { id } = req.params;
 
   try {
+    const sql = getDb();
     const usersCount = await sql`SELECT COUNT(*) as count FROM admin_users`;
     
     if (parseInt(usersCount[0].count) <= 1) {

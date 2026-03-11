@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../lib/db";
 import { randomUUID } from "crypto";
 import { logActivity } from "../services/activityLog";
 
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
-
 export async function initOrdersTables() {
   try {
+    const sql = getDb();
     await sql`
       CREATE TABLE IF NOT EXISTS announcements (
         id SERIAL PRIMARY KEY,
@@ -108,10 +107,9 @@ export async function initOrdersTables() {
   }
 }
 
-initOrdersTables();
-
 export async function createOrder(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { firstName, lastName, phone, items, totalPrice, uniqueId } = req.body;
 
     // Get client IP address
@@ -320,6 +318,7 @@ export async function createOrder(req: Request, res: Response) {
 
 export async function getAllOrders(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { status, search } = req.query;
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
@@ -359,6 +358,7 @@ export async function getAllOrders(req: Request, res: Response) {
 
 export async function getOrderById(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
 
     const [order] = await sql`SELECT * FROM orders WHERE id = ${id}`;
@@ -380,6 +380,7 @@ export async function getOrderById(req: Request, res: Response) {
 
 export async function updateOrderStatus(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
     const { status, username, cancellationReason } = req.body;
 
@@ -650,6 +651,7 @@ export async function updateOrderStatus(req: Request, res: Response) {
 
 export async function deleteOrder(req: Request, res: Response) {
   try {
+    const sql = getDb();
     const { id } = req.params;
 
     // Fetch order items BEFORE deleting

@@ -1,10 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
-import { neon } from "@neondatabase/serverless";
-
-const sql = neon(process.env.EXTERNAL_DATABASE_URL!);
+import { getDb } from "../lib/db";
 
 export async function initAuditLogsTable() {
   try {
+    const sql = getDb();
     await sql`
       CREATE TABLE IF NOT EXISTS audit_logs (
         id SERIAL PRIMARY KEY,
@@ -67,6 +66,7 @@ export function auditLog(req: any, res: Response, next: NextFunction) {
 
 async function logAuditEvent(event: any) {
   try {
+    const sql = getDb();
     console.log("📝 Logging audit event:", { action: event.action, resource: event.resource_type, name: event.resource_name });
     
     await sql`
