@@ -326,7 +326,7 @@ function OrderCard({ order, token, onCancelled }: { order: Order; token: string 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(250, 120, 80);
-      doc.text(`Points utilisés : ${Math.abs(redeemedTx.points)} pts`, 110, y);
+      doc.text(`Points utilisés : ${Math.abs(redeemedTx.points)} points`, 110, y);
       const discountLine = redeemedTx.description.match(/\$[\d\s,]+/) || [];
       if (discountLine.length > 0) {
         doc.text(`(−${discountLine[0]})`, 190, y, { align: "right" });
@@ -347,7 +347,7 @@ function OrderCard({ order, token, onCancelled }: { order: Order; token: string 
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(245, 158, 11);
-      doc.text(`Points fidélité gagnés : +${ptsGagnes} pts`, 110, y);
+      doc.text(`Points fidélité gagnés : +${ptsGagnes} points`, 110, y);
     }
 
     y += 16;
@@ -1268,7 +1268,7 @@ export default function Account() {
                   </div>
                   <div className="bg-gray-900 border border-amber-600/20 rounded-xl p-4 text-center">
                     <p className="text-3xl font-bold text-amber-300">{referralCount * 20}</p>
-                    <p className="text-xs text-gray-400 mt-1">Pts gagnés via parrainage</p>
+                    <p className="text-xs text-gray-400 mt-1">Points gagnés via parrainage</p>
                   </div>
                 </div>
 
