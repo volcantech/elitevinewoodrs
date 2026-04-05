@@ -1,0 +1,187 @@
+import { useEffect, useRef, useState } from "react";
+import { Mic, MicOff, Monitor, MonitorOff, PhoneOff, Users, Minimize2, Maximize2 } from "lucide-react";
+import { useGroupCallContext, GCParticipant } from "@/contexts/GroupCallContext";
+
+function ScreenShareOverlay({
+  stream, sharer, onStop, isLocal, minimized, onToggleMinimize,
+}: {
+  stream: MediaStream;
+  sharer: GCParticipant | null;
+  onStop?: () => void;
+  isLocal: boolean;
+  minimized: boolean;
+  onToggleMinimize: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.srcObject = stream;
+  }, [stream]);
+
+  if (minimized) {
+    return (
+      <div className="fixed bottom-24 right-4 z-[185] w-64 rounded-xl overflow-hidden shadow-2xl border border-gray-700/60 bg-black">
+        <div className="flex items-center justify-between px-2 py-1 bg-gray-900/90 border-b border-gray-700">
+          <div className="flex items-center gap-1.5 text-[11px] text-gray-300 truncate">
+            <Monitor className="w-3 h-3 text-green-400 shrink-0" />
+            <span className="truncate">{isLocal ? "Votre écran" : `${sharer?.username}`}</span>
+          </div>
+          <button onClick={onToggleMinimize} className="text-gray-400 hover:text-white ml-1 shrink-0">
+            <Maximize2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        <video ref={videoRef} autoPlay muted={isLocal} playsInline className="w-full aspect-video object-contain bg-black" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[180] bg-black/95 flex flex-col">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-800 shrink-0">
+        <div className="flex items-center gap-2 text-sm text-gray-300">
+          <Monitor className="w-4 h-4 text-green-400" />
+          {isLocal
+            ? <span>Vous partagez votre écran</span>
+            : <span>Partage de <span className="text-white font-semibold">{sharer?.username}</span></span>}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onToggleMinimize}
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-white border border-gray-700 rounded px-2 py-1 transition-colors"
+          >
+            <Minimize2 className="w-3 h-3" />
+            Réduire
+          </button>
+          {isLocal && onStop && (
+            <button onClick={onStop} className="text-xs text-red-400 hover:text-red-300 border border-red-500/30 rounded px-2 py-1 transition-colors">
+              Arrêter le partage
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="flex-1 flex items-center justify-center p-4">
+        <video ref={videoRef} autoPlay muted={isLocal} playsInline className="max-w-full max-h-full object-contain rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+function ParticipantAvatar({ p, isMe, localMuted }: { p: GCParticipant; isMe: boolean; localMuted?: boolean }) {
+  const showMuted = isMe ? !!localMuted : !!p.isMuted;
+  return (
+    <div className="relative flex-shrink-0" title={`${isMe ? "Vous" : p.username}${showMuted ? " (micro coupé)" : ""}`}>
+      <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center overflow-hidden">
+        {p.avatar_url
+          ? <img src={p.avatar_url} alt={p.username} className="w-full h-full object-cover" />
+          : <span className="text-xs font-bold text-amber-400">{p.username[0]?.toUpperCase()}</span>}
+      </div>
+      {showMuted && (
+        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+          <MicOff className="w-2 h-2 text-white" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function GroupCallPanel() {
+  const {
+    isInGroupCall, groupCallRoomName, participants, localUser,
+    isMuted, isScreenSharing, screenShareUserId, remoteScreenStream, localScreenStream,
+    leaveGroupCall, toggleMute, toggleScreenShare,
+  } = useGroupCallContext();
+
+  const [screenMinimized, setScreenMinimized] = useState(false);
+
+  if (!isInGroupCall) return null;
+
+  const allParticipants = localUser
+    ? [localUser, ...participants.filter(p => p.userId !== localUser.userId)]
+    : participants;
+
+  const sharer = screenShareUserId
+    ? allParticipants.find(p => p.userId === screenShareUserId) ?? null
+    : null;
+
+  const showRemoteScreen = !isScreenSharing && !!remoteScreenStream;
+  const showLocalScreen = isScreenSharing && !!localScreenStream;
+
+  return (
+    <>
+      {/* Screen share overlay / pip */}
+      {showLocalScreen && localScreenStream && (
+        <ScreenShareOverlay
+          stream={localScreenStream}
+          sharer={localUser}
+          isLocal={true}
+          onStop={toggleScreenShare}
+          minimized={screenMinimized}
+          onToggleMinimize={() => setScreenMinimized(v => !v)}
+        />
+      )}
+      {showRemoteScreen && remoteScreenStream && (
+        <ScreenShareOverlay
+          stream={remoteScreenStream}
+          sharer={sharer}
+          isLocal={false}
+          minimized={screenMinimized}
+          onToggleMinimize={() => setScreenMinimized(v => !v)}
+        />
+      )}
+
+      {/* Compact bottom bar */}
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 bg-gray-900 border border-green-500/30 rounded-full px-4 py-2.5 shadow-2xl">
+        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0" />
+        <span className="text-white text-sm font-semibold max-w-[120px] truncate">{groupCallRoomName}</span>
+        <div className="w-px h-4 bg-gray-700 shrink-0" />
+
+        <div className="flex items-center -space-x-1.5">
+          {allParticipants.slice(0, 5).map(p => (
+            <ParticipantAvatar key={p.userId} p={p} isMe={p.userId === localUser?.userId} localMuted={isMuted} />
+          ))}
+          {allParticipants.length > 5 && (
+            <div className="w-7 h-7 rounded-full bg-gray-700 border border-gray-600 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">
+              +{allParticipants.length - 5}
+            </div>
+          )}
+        </div>
+
+        {allParticipants.length > 1 && (
+          <div className="flex items-center gap-1 text-[11px] text-gray-400">
+            <Users className="w-3 h-3" />
+            {allParticipants.length}
+          </div>
+        )}
+
+        <div className="w-px h-4 bg-gray-700 shrink-0" />
+
+        <button
+          onClick={toggleMute}
+          title={isMuted ? "Réactiver micro" : "Couper micro"}
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors border ${
+            isMuted ? "bg-orange-500/20 text-orange-400 border-orange-500/30" : "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-600"
+          }`}
+        >
+          {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+        </button>
+
+        <button
+          onClick={toggleScreenShare}
+          title={isScreenSharing ? "Arrêter le partage" : "Partager l'écran"}
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors border ${
+            isScreenSharing ? "bg-blue-500/20 text-blue-400 border-blue-400/40" : "bg-gray-800 text-gray-300 border-gray-700 hover:border-gray-600"
+          }`}
+        >
+          {isScreenSharing ? <MonitorOff className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
+        </button>
+
+        <button
+          onClick={leaveGroupCall}
+          title="Raccrocher"
+          className="w-8 h-8 rounded-full bg-red-500 hover:bg-red-400 flex items-center justify-center text-white transition-colors"
+        >
+          <PhoneOff className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </>
+  );
+}
