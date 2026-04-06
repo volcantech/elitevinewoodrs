@@ -69,6 +69,7 @@ function convPreview(conv: Conversation): string {
   if (conv.last_message_type === "call") return "📞 Appel";
   if (conv.last_message_type === "missed_call") return "📵 Appel manqué";
   if (conv.last_message_type === "deleted") return "🗑 Message supprimé";
+  if (conv.last_message_type === "audio") return "🎤 Message vocal";
   if (PROFILE_LINK_RE.test(conv.last_message?.trim() || "")) return "📎 Profil partagé";
   return conv.last_message || "";
 }
