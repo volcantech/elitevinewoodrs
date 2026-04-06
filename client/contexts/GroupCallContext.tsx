@@ -271,6 +271,9 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
   }
 
   async function applyLocalScreenQuality(preset: QualityPreset) {
+    const track = screenStreamRef.current?.getVideoTracks()[0];
+    const capturedHeight = track?.getSettings()?.height || 1080;
+
     for (const [, sender] of screenSendersRef.current) {
       try {
         const params = sender.getParameters();
@@ -279,17 +282,15 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
         }
         params.encodings[0].maxBitrate = preset.maxBitrate;
         if (preset.maxFramerate) (params.encodings[0] as any).maxFramerate = preset.maxFramerate;
+        if (preset.height) {
+          params.encodings[0].scaleResolutionDownBy = Math.max(1, capturedHeight / preset.height);
+        }
         await sender.setParameters(params);
       } catch (e) { console.warn("applyLocalScreenQuality setParameters failed:", e); }
     }
     try {
-      const track = screenStreamRef.current?.getVideoTracks()[0];
-      if (track) {
-        const constraints: MediaTrackConstraints = {};
-        if (preset.height) constraints.height = { ideal: preset.height };
-        if (preset.width) constraints.width = { ideal: preset.width };
-        if (preset.maxFramerate) constraints.frameRate = { ideal: preset.maxFramerate };
-        await track.applyConstraints(constraints);
+      if (track && preset.maxFramerate) {
+        await track.applyConstraints({ frameRate: { ideal: preset.maxFramerate } });
       }
     } catch (e) { console.warn("applyLocalScreenQuality applyConstraints failed:", e); }
   }
