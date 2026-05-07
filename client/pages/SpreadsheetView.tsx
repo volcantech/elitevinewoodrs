@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, ArrowLeft, AlertTriangle, Table2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface Column { id: string; name: string; type: "text" | "number" | "link"; }
+interface Column { id: string; name: string; type: "text" | "number" | "link" | "date" | "checkbox" | "dropdown" | "color"; }
 interface SheetRow { id: number; data: Record<string, any>; row_index: number; }
 interface PublicSheet {
   id: number; title: string; columns: Column[]; rows: SheetRow[];
@@ -109,8 +109,10 @@ export default function SpreadsheetView() {
                                 {val.label || "Cliquer ici"} <ExternalLink className="w-3 h-3" />
                               </a>
                             ) : <span className="text-gray-300 italic">—</span>
+                          ) : col.type === "checkbox" ? (
+                            <span className="text-lg">{val === true || val === "true" || val === "True" ? "✅" : "❌"}</span>
                           ) : (
-                            <span>{val !== undefined && val !== "" ? String(val) : <span className="text-gray-300">—</span>}</span>
+                            <span>{val !== undefined && val !== null && val !== "" ? String(val) : <span className="text-gray-300">—</span>}</span>
                           )}
                         </td>
                       );
