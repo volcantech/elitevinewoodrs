@@ -89,7 +89,6 @@ export async function dumpDatabase(_req: Request, res: Response) {
 
     // ── helpers ──────────────────────────────────────────────────────────────
     function resolveColumnType(data_type: string, column_default: string | null): string {
-      // Detect SERIAL columns by default expression
       if (column_default && column_default.startsWith("nextval(")) {
         if (data_type === "integer") return "SERIAL";
         if (data_type === "bigint") return "BIGSERIAL";
@@ -98,29 +97,42 @@ export async function dumpDatabase(_req: Request, res: Response) {
       return data_type;
     }
 
+    // Build CREATE TABLE without foreign key constraints
+    // Foreign keys are collected separately and added at the end
     function buildCreateTable(table: string): string {
       const cols = allColumns[table] || [];
       const constraints = allConstraints[table] || [];
       const lines: string[] = [];
 
-      // Columns
       for (const col of cols) {
         const colType = resolveColumnType(col.data_type, col.column_default);
         const notNull = col.not_null ? " NOT NULL" : "";
         let defaultClause = "";
-        // Skip default for SERIAL columns (already implied)
         if (col.column_default && !col.column_default.startsWith("nextval(")) {
           defaultClause = ` DEFAULT ${col.column_default}`;
         }
         lines.push(`  "${col.column_name}" ${colType}${notNull}${defaultClause}`);
       }
 
-      // Constraints (p=primary key, u=unique, f=foreign key, c=check)
+      // Only PRIMARY KEY, UNIQUE, and CHECK constraints here — NOT foreign keys
       for (const con of constraints) {
-        lines.push(`  CONSTRAINT "${con.constraint_name}" ${con.definition}`);
+        if (con.constraint_type !== "f") {
+          lines.push(`  CONSTRAINT "${con.constraint_name}" ${con.definition}`);
+        }
       }
 
       return `CREATE TABLE IF NOT EXISTS "${table}" (\n${lines.join(",\n")}\n);`;
+    }
+
+    // Collect all foreign key constraints to add after all tables are created
+    function buildForeignKeys(table: string): string[] {
+      const constraints = allConstraints[table] || [];
+      return constraints
+        .filter((con) => con.constraint_type === "f")
+        .map(
+          (con) =>
+            `ALTER TABLE "${table}" ADD CONSTRAINT "${con.constraint_name}" ${con.definition};`
+        );
     }
 
     function sqlValue(v: unknown): string {
@@ -143,9 +155,9 @@ export async function dumpDatabase(_req: Request, res: Response) {
     dump += `SET check_function_bodies = false;\n`;
     dump += `SET client_min_messages = warning;\n\n`;
 
-    // ── SCHEMA ───────────────────────────────────────────────────────────────
+    // ── 1. SCHEMA — tables without FK constraints ────────────────────────────
     dump += `-- ============================================================\n`;
-    dump += `-- SCHEMA\n`;
+    dump += `-- SCHEMA - Tables (sans foreign keys)\n`;
     dump += `-- ============================================================\n\n`;
 
     for (const { table_name } of tables) {
@@ -156,9 +168,9 @@ export async function dumpDatabase(_req: Request, res: Response) {
       if (idxs.length > 0) dump += "\n";
     }
 
-    // ── DATA ────────────────────────────────────────────────────────────────
+    // ── 2. DATA — inserted before FK constraints so order doesn't matter ─────
     dump += `-- ============================================================\n`;
-    dump += `-- DATA\n`;
+    dump += `-- DATA (foreign keys ajoutées après, ordre sans importance)\n`;
     dump += `-- ============================================================\n\n`;
 
     for (const { table_name } of tables) {
@@ -178,7 +190,23 @@ export async function dumpDatabase(_req: Request, res: Response) {
       dump += "\n";
     }
 
-    // ── SEQUENCES ────────────────────────────────────────────────────────────
+    // ── 3. FOREIGN KEY CONSTRAINTS — added after all data is in ─────────────
+    const allForeignKeys: string[] = [];
+    for (const { table_name } of tables) {
+      allForeignKeys.push(...buildForeignKeys(table_name));
+    }
+
+    if (allForeignKeys.length > 0) {
+      dump += `-- ============================================================\n`;
+      dump += `-- FOREIGN KEY CONSTRAINTS\n`;
+      dump += `-- ============================================================\n\n`;
+      for (const fk of allForeignKeys) {
+        dump += fk + "\n";
+      }
+      dump += "\n";
+    }
+
+    // ── 4. SEQUENCES ─────────────────────────────────────────────────────────
     if (sequences.length > 0) {
       dump += `-- ============================================================\n`;
       dump += `-- SEQUENCES (reset auto-increment)\n`;
@@ -188,6 +216,7 @@ export async function dumpDatabase(_req: Request, res: Response) {
           dump += `SELECT setval('${sequence_name}', ${last_value}, true);\n`;
         }
       }
+      dump += "\n";
     }
 
     const day = String(now.getDate()).padStart(2, "0");
